@@ -1,10 +1,10 @@
 # Личный проект «Шесть городов»
 
 * Студент: [Елена Тыщенко](https://up.htmlacademy.ru/nodejs-api/6/user/504901).
-* Наставник: `Неизвестно`.
+* Наставник: [Константин Ильин](https://htmlacademy.ru/profile/id2374827).
 
 ---
-
+ 
 _Не удаляйте и не изменяйте папки и файлы:_
 _`.editorconfig`, `.gitattributes`, `.gitignore`._
 
