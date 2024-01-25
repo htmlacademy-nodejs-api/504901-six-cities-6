@@ -1,11 +1,10 @@
-import { TypeOfHousing } from './housing-type.enum.js';
-import { User } from './user.type.js';
+import { TypeOfHousing, User, CityLocation } from './index.js';
 
-export type Offer = {
+export interface Offer {
   title: string;
   description: string;
   postDate: Date;
-  city: string;
+  cityLocation: CityLocation;
   image: string;
   photos: string[];
   isPremium: boolean;
@@ -18,5 +17,4 @@ export type Offer = {
   comforts: string[];
   user: User;
   commentsCount: number;
-  coordinates: string;
 }

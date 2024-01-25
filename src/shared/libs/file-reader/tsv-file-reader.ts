@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { FileReader } from './file-reader.interface.js';
-import { Offer, TypeOfHousing } from '../../types/index.js';
+import { City, Offer, TypeOfHousing, UserType} from '../../types/index.js';
 
 export class TSVFileReader implements FileReader {
   private rawData = '';
@@ -10,6 +10,9 @@ export class TSVFileReader implements FileReader {
   ) {}
 
   public read(): void {
+    if (!this.filename) {
+      throw new Error('File not found');
+    }
     this.rawData = readFileSync(this.filename, { encoding: 'utf-8' });
   }
 
@@ -27,6 +30,8 @@ export class TSVFileReader implements FileReader {
         description,
         postDate,
         city,
+        latitude,
+        longitude,
         image,
         photos,
         isPremium,
@@ -40,12 +45,13 @@ export class TSVFileReader implements FileReader {
         name,
         email,
         avatarPath,
-        coordinates
+        password,
+        userType
       ]) => ({
         title,
         description,
         postDate: new Date(postDate),
-        city,
+        cityLocation: {name:city as City, location:{latitude: Number.parseFloat(latitude), longitude: Number.parseFloat(longitude)}},
         image,
         price: Number.parseInt(price, 10),
         photos: photos.split(';'),
@@ -56,8 +62,7 @@ export class TSVFileReader implements FileReader {
         roomsCount: Number.parseInt(roomsCount, 10),
         guestsCount: Number.parseInt(guestsCount, 10),
         comforts: comforts.split(';'),
-        user: { email, avatarPath, name },
-        coordinates,
+        user: { email, avatarPath, name, password, userType: userType as UserType },
         commentsCount: 0
       }));
   }
