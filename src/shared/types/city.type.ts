@@ -1,4 +1,4 @@
-import { Location, City } from "./index.js";
+import { Location, City } from './index.js';
 
 export type CityLocation = {
   name: City,
