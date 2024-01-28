@@ -17,20 +17,20 @@ export function createOffer(offerData: string): Offer {
     guestsCount,
     comforts,
     price,
-    userType,
     name,
     email,
     avatar,
     password,
+    userType,
     commentsCount
   ] = offerData.replace('\n', '').split('\t');
 
   const user = {
-    userType: userType as UserType,
     name,
     email,
     avatar,
     password,
+    userType: userType as UserType,
   };
 
   const [cityName, latitude, longitude] = city.split(',');
@@ -56,8 +56,8 @@ export function createOffer(offerData: string): Offer {
     roomsCount: Number.parseInt(roomsCount, DECIMAL),
     guestsCount: Number.parseInt(guestsCount, DECIMAL),
     comforts: comforts.split(';'),
-    user,
     price: Number.parseInt(price, DECIMAL),
+    user,
     commentsCount: Number.parseInt(commentsCount, DECIMAL)
   };
 }
