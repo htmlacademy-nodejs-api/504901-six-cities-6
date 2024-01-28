@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { FileReader } from './file-reader.interface.js';
-import { City, Offer, TypeOfHousing, UserType} from '../../types/index.js';
+import { City, CityLocation, Offer, TypeOfHousing, UserType} from '../../types/index.js';
+
 
 export class TSVFileReader implements FileReader {
   private rawData = '';
@@ -9,12 +10,25 @@ export class TSVFileReader implements FileReader {
     private readonly filename: string
   ) {}
 
+  private parseCity(city: string):CityLocation {
+    const [name, latitude, longitude] = city.split(',');
+    return {
+      name: name as City,
+      location:{
+        latitude: Number.parseFloat(latitude),
+        longitude: Number.parseFloat(longitude)
+      }
+    };
+  }
+
   public read(): void {
     if (!this.filename) {
       throw new Error('File not found');
     }
     this.rawData = readFileSync(this.filename, { encoding: 'utf-8' });
   }
+
+
 
   public toArray(): Offer[] {
     if (!this.rawData) {
@@ -30,8 +44,6 @@ export class TSVFileReader implements FileReader {
         description,
         postDate,
         city,
-        latitude,
-        longitude,
         image,
         photos,
         isPremium,
@@ -40,8 +52,8 @@ export class TSVFileReader implements FileReader {
         typeOfHousing,
         roomsCount,
         guestsCount,
-        price,
         comforts,
+        price,
         name,
         email,
         avatarPath,
@@ -51,9 +63,8 @@ export class TSVFileReader implements FileReader {
         title,
         description,
         postDate: new Date(postDate),
-        cityLocation: {name:city as City, location:{latitude: Number.parseFloat(latitude), longitude: Number.parseFloat(longitude)}},
+        cityLocation: this.parseCity(city),
         image,
-        price: Number.parseInt(price, 10),
         photos: photos.split(';'),
         isPremium: isPremium === 'true',
         isFavourites: isFavourites === 'true',
@@ -62,6 +73,7 @@ export class TSVFileReader implements FileReader {
         roomsCount: Number.parseInt(roomsCount, 10),
         guestsCount: Number.parseInt(guestsCount, 10),
         comforts: comforts.split(';'),
+        price: Number.parseInt(price, 10),
         user: { email, avatarPath, name, password, userType: userType as UserType },
         commentsCount: 0
       }));
