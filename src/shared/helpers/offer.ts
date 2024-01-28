@@ -11,7 +11,7 @@ export function createOffer(offerData: string): Offer {
     photos,
     isPremium,
     isFavourites,
-    rating, 
+    rating,
     typeOfHousing,
     roomsCount,
     guestsCount,
@@ -26,7 +26,7 @@ export function createOffer(offerData: string): Offer {
   ] = offerData.replace('\n', '').split('\t');
 
   const user = {
-    userType: userType as  UserType,
+    userType: userType as UserType,
     name,
     email,
     avatar,
@@ -40,7 +40,7 @@ export function createOffer(offerData: string): Offer {
       latitude: Number.parseFloat(latitude),
       longitude: Number.parseFloat(longitude)
     }
-  }
+  };
 
   return {
     title,
@@ -59,5 +59,5 @@ export function createOffer(offerData: string): Offer {
     user,
     price: Number.parseInt(price, DECIMAL),
     commentsCount: Number.parseInt(commentsCount, DECIMAL)
-    };
+  };
 }
