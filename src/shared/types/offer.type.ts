@@ -1,4 +1,4 @@
-import { TypeOfHousing, User, CityLocation } from './index.js';
+import { TypeOfHousing, User, CityLocation, Location } from './index.js';
 
 export interface Offer {
   title: string;
@@ -17,4 +17,5 @@ export interface Offer {
   comforts: string[];
   user: User;
   commentsCount: number;
+  offerLocation: Location;
 }
