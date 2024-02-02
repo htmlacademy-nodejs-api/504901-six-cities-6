@@ -1,5 +1,4 @@
-import { Offer, City, TypeOfHousing, UserType } from '../types/index.js';
-import { TRUE, DECIMAL } from '../constants/index.js';
+import { Offer, City, TypeOfHousing, UserType, Location } from '../types/index.js';
 
 export function createOffer(offerData: string): Offer {
   const [
@@ -22,7 +21,8 @@ export function createOffer(offerData: string): Offer {
     avatar,
     password,
     userType,
-    commentsCount
+    commentsCount,
+    location
   ] = offerData.replace('\n', '').split('\t');
 
   const user = {
@@ -41,6 +41,11 @@ export function createOffer(offerData: string): Offer {
       longitude: Number.parseFloat(longitude)
     }
   };
+  const [offerLatitude, offerLongitude] = location.split(',');
+  const offerLocation = {
+    latitude: Number.parseFloat(offerLatitude),
+    longitude: Number.parseFloat(offerLongitude)
+  };
 
   return {
     title,
@@ -49,15 +54,16 @@ export function createOffer(offerData: string): Offer {
     cityLocation,
     image,
     photos: photos.split(';'),
-    isPremium: isPremium === TRUE,
-    isFavourites: isFavourites === TRUE,
+    isPremium: isPremium === 'true',
+    isFavourites: isFavourites === 'true',
     rating: Number.parseFloat(rating),
     typeOfHousing: typeOfHousing as TypeOfHousing,
-    roomsCount: Number.parseInt(roomsCount, DECIMAL),
-    guestsCount: Number.parseInt(guestsCount, DECIMAL),
+    roomsCount: Number.parseInt(roomsCount, 10),
+    guestsCount: Number.parseInt(guestsCount, 10),
     comforts: comforts.split(';'),
-    price: Number.parseInt(price, DECIMAL),
+    price: Number.parseInt(price, 10),
     user,
-    commentsCount: Number.parseInt(commentsCount, DECIMAL)
+    commentsCount: Number.parseInt(commentsCount, 10),
+    offerLocation: offerLocation as Location
   };
 }
