@@ -33,14 +33,6 @@ export function createOffer(offerData: string): Offer {
     userType: userType as UserType,
   };
 
-  const [cityName, latitude, longitude] = city.split(',');
-  const cityLocation = {
-    name: cityName as City,
-    location: {
-      latitude: Number.parseFloat(latitude),
-      longitude: Number.parseFloat(longitude)
-    }
-  };
   const [offerLatitude, offerLongitude] = location.split(',');
   const offerLocation = {
     latitude: Number.parseFloat(offerLatitude),
@@ -51,7 +43,7 @@ export function createOffer(offerData: string): Offer {
     title,
     description,
     postDate: new Date(createdDate),
-    cityLocation,
+    city: city as City,
     image,
     photos: photos.split(';'),
     isPremium: isPremium === 'true',

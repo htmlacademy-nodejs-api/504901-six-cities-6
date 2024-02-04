@@ -1,10 +1,10 @@
-import { TypeOfHousing, User, CityLocation, Location } from './index.js';
+import { TypeOfHousing, User, City, Location } from './index.js';
 
 export interface Offer {
   title: string;
   description: string;
   postDate: Date;
-  cityLocation: CityLocation;
+  city: City;
   image: string;
   photos: string[];
   isPremium: boolean;
