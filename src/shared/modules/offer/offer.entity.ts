@@ -23,7 +23,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({
     type: () => String,
-    enum: City
   })
   public city!: City;
 
@@ -44,7 +43,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({
     type: () => String,
-    enum: TypeOfHousing
   })
   public typeOfHousing!: TypeOfHousing;
 
@@ -71,10 +69,8 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({
     required: true,
-    //type: () => String,
   })
   public offerLocation!: Location;
-
 }
 
 export const OfferModel = getModelForClass(OfferEntity);

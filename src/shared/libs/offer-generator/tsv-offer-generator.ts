@@ -42,7 +42,6 @@ export class TSVOfferGenerator implements OfferGenerator {
     const password = getRandomItem(this.mockData.userPasswords);
     const commentsCount = generateRandomValue(REVIEW.MIN, REVIEW.MAX).toString();
     const location = getRandomItem<string>(this.mockData.locations);
-
     return [
       title, description, createdDate, city, image, photos,
       isPremium, isFavourites, rating, typeOfHousing, roomsCount,

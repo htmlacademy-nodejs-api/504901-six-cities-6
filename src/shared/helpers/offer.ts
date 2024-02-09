@@ -33,10 +33,10 @@ export function createOffer(offerData: string): Offer {
     userType: userType as UserType,
   };
 
-  const [offerLatitude, offerLongitude] = location.split(',');
+  const [offerLatitude, offerLongitude] = location.split(';');
   const offerLocation = {
-    latitude: Number.parseFloat(offerLatitude),
-    longitude: Number.parseFloat(offerLongitude)
+    latitude: offerLatitude,
+    longitude: offerLongitude
   };
 
   return {
