@@ -7,7 +7,7 @@ import { DatabaseClient, MongoDatabaseClient } from '../../shared/libs/database-
 import { Logger } from '../../shared/libs/logger/index.js';
 import { ConsoleLogger } from '../../shared/libs/logger/console.logger.js';
 import { DefaultUserService, UserModel } from '../../shared/modules/user/index.js';
-import { DEFAULT_DB_PORT, DEFAULT_USER_PASSWORD } from './command.constant.js';
+import { DEFAULT_USER_PASSWORD } from './command.constant.js';
 import { Offer } from '../../shared/types/index.js';
 
 export class ImportCommand implements Command {
@@ -69,8 +69,15 @@ export class ImportCommand implements Command {
     return '--import';
   }
 
-  public async execute(filename: string, login: string, password: string, host: string, dbname: string, salt: string): Promise<void> {
-    const uri = getMongoURI(login, password, host, DEFAULT_DB_PORT, dbname);
+  public async execute(filename: string,
+    login: string = process.env.DB_USER as string,
+    password: string = process.env.DB_PASSWORD as string,
+    host: string = process.env.DB_HOST as string,
+    port: string = process.env.DB_PORT as string,
+    dbname: string = process.env.DB_NAME as string,
+    salt: string = process.env.SALT as string
+  ): Promise<void> {
+    const uri = getMongoURI(login, password, host, port, dbname);
     this.salt = salt;
 
     await this.databaseClient.connect(uri);
