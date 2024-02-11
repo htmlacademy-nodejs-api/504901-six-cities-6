@@ -51,3 +51,9 @@ export const cities: Record<City, Location> = {
     longitude: 6.776314
   },
 } as const;
+
+export const RETRY = {
+  COUNT: 5,
+  TIMEOUT: 1000,
+} as const;
+

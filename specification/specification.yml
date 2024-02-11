@@ -1,0 +1,674 @@
+openapi: 3.1.0
+info:
+  title: API сервер для демо-проекта «Шесть городов».
+  description: |-
+    * Список ресурсов и маршрутов сервера «Шесть городов».
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 2.0.0
+
+tags:
+- name: users
+  description: Управление учетными записями пользователей.
+- name: offers
+  description: Управление предложениями об аренде.
+- name: comments
+  description: Добавление комментариев к определённому предложению по аренде.
+- name: favorites
+  description: Управление списком избранных предложений пользователя.
+
+paths:
+  /registration:
+    post:
+      tags:
+        - users
+      summary: Регистрация пользователя
+      description: Регистрирует нового пользователя. Создавать новых пользователей могут только анонимные клиенты
+
+      requestBody:
+        description: Информация для создания нового пользователя.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/newUser'
+        required: true
+
+      responses:
+        "201":
+          description: Пользователь создан.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+        "400":
+          description: Неверный запрос или данные.
+
+        "500":
+          description: Внутренняя ошибка сервера.
+
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Аутентификация пользователя
+      description: Аутентификация пользователя и предоставление доступа к закрытым разделам приложения. В случае успешной проверки логина и пароля сервис возвращает клиенту токен.
+
+      requestBody:
+        description: Информация для аутентификации пользователя.
+        content:
+          application/json:
+           schema:
+              type: object
+
+              properties:
+                email:
+                  type: string
+
+                password:
+                  type: string
+
+      responses:
+        "200":
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        "400":
+          description: Неверный логин или пароль.
+        "500":
+          description: Внутренняя ошибка сервера.
+        required: true
+
+    get:
+      tags:
+        - users
+      summary: Проверка текущего статуса пользователя
+      description: Возвращает информацию авторизован пользователь или нет по токену сессии
+
+      responses:
+        "200":
+          description: Пользователь авторизован.
+          content:
+            application/json:
+            schema:
+                type: object
+
+                properties:
+                name:
+                  type: string
+
+                email:
+                  type: string
+
+                avatar:
+                  type: string
+                  nullable: true
+
+                typeUser:
+                  $ref: '#/components/schemas/userType'
+
+        "401":
+          description: Пользователь не авторизован или сессия истекла
+          
+      security:
+        - bearerToken: []
+
+  /users/logout/:
+    get:
+      tags:
+        - users
+      summary: Завершение пользовательского сеанса
+      description: Выход пользователя из системы и завершение сессии. Действие доступно только для авторизованных пользователей.
+
+      responses:
+        '204':
+          description: Успешный выход из системы
+        '401':
+          description: Требуется аутентификация.
+
+  /offers:
+    get:
+      tags:
+        - offers
+      summary: Возвращает список предложений по аренде недвижимости.
+      description: По умолчанию сервис возвращает не больше 60 предложений по аренде. Клиент может запросить больше предложений, указав нужное количество в параметре запроса
+      parameters:
+        - name: city
+          in: query
+          description: Название города для фильтрации предложений
+          required: false
+          schema:
+            type: string
+
+        - name: limit
+          in: query
+          description: Количество возвращаемых предложений
+          required: false
+          schema:
+            type: integer
+            default: 60
+
+      responses:
+        "200":
+          description: Список предложений об аренде
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/offer'
+
+        "400":
+          description: Неверные параметры запроса.
+
+        "500":
+          description: Внутренняя ошибка сервера.
+
+    post:
+      tags:
+        - offers
+      summary: Создание предложения по аренде
+      description: Создавать предложения могут только авторизованные клиенты
+
+      requestBody:
+        description: Информация для создания предложения по аренде.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/offer'
+
+      responses:
+        "201":
+          description: Предложение по аренде успешно создано.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+        "400":
+           description: Неверный запрос или данные.
+
+        "401":
+          description: Создавать предложения по аренде могут только авторизованные пользователи.
+
+        "500":
+          description: Внутренняя ошибка сервера.
+
+  /offers/{offerId}:
+    get:
+      tags:
+        - offers
+      summary: Предоставляет детальную информации о конкретном предложении об аренде недвижимости.
+      description: Детальную информацию по предложению могут запрашивать авторизованные и анонимные клиенты.
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          description: ID предложения
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Детальная информация получена.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+
+        "400":
+          description: Неверный запрос или данные.
+
+        "404":
+          description: Предложение не найдено.
+
+        "500":
+          description: Внутренняя ошибка сервера.
+
+    put:
+      tags:
+        - offers
+      summary: Редактирование предложения по аренде.
+      description: Редактировать предложения по аренде могут только авторизованные клиенты.
+      parameters:
+        - name: offerId
+          in: path
+          description: ID предложения
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/offer'
+
+      responses:
+        "200":
+          description: Предложение успешно обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+
+        "400":
+          description: Неверный запрос или данные.
+
+        "401":
+          description: Требуется аутентификация.
+
+        "403":
+          description: Вы не можете отредактировать чужое предложение по аренде.
+
+        "404":
+          description: Предложение не найдено.
+
+        "500":
+          description: Внутренняя ошибка сервера.
+
+      security:
+        - bearerToken: []
+
+    delete:
+      tags:
+        - offers
+      summary: Удаление предложения по аренде.
+      description: Удалять предложения могут только авторизованные клиенты.
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          description: ID предложения
+          schema:
+            type: string
+
+      responses:
+        "204":
+          description: Предложение успешно удалено.
+
+        "400":
+          description: Неверный запрос или данные.
+
+        "401":
+          description: Требуется аутентификация.
+
+        "403":
+          description: Нельзя удалить предложение другого пользователя.
+
+        "404":
+          description: Предложение не найдено.
+
+        "500":
+          description: Внутренняя ошибка сервера.
+
+      security:
+        - bearerToken: []
+
+  /comments/{offerId}:
+      get:
+        tags:
+          - comments
+        summary: Получение списка комментариев, связанных с определённым предложением об аренде.
+        description: Сервис всегда возвращает список из 50 (или меньше) последних комментариев. Комментарии отсортированы по дате публикации (по убыванию). Комментарии могут запрашивать авторизованные и анонимные клиенты.
+        parameters:
+          - name: offerId
+            in: path
+            required: true
+            description: ID предложения
+            schema:
+              type: string
+
+        responses:
+          "200":
+            description: Список комментариев
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/comment'
+          "404":
+            description: Предложение не найдено.
+          '500':
+            description: Внутренняя ошибка сервера.
+      post:
+        tags:
+          - comments
+        summary: Добавление нового комментария к предложению об аренде.
+        description: Добавлять комментарии могут только авторизованные клиенты.
+        parameters:
+          - name: offerId
+            in: path
+            required: true
+            description: ID предложения
+            schema:
+              type: string
+
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/comment'
+
+        responses:
+          "201":
+            description: Комментарий успешно добавлен
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/comment'
+
+          "400":
+            description: Неверный запрос или данные.
+
+          "401":
+            description: Требуется аутентификация.
+
+          "404":
+            description: Предложение не найдено.
+
+          "500":
+            description: Внутренняя ошибка сервера.
+
+        security:
+          - bearerToken: []
+
+  /offers/city/premium:
+    get:
+      tags:
+        - offers
+      summary: Получение списка премиальных предложений для определённого города.
+      description: Сервис возвращает не больше 3 предложений с флагом «Premium». Список возвращаемых предложений отсортирован по дате публикации (по убыванию). Доступно авторизованным и анонимным клиентам.
+      parameters:
+          - name: city
+            in: query
+            required: true
+            description: Название города для фильтрации предложений
+            schema:
+              type: string
+
+      responses:
+        "200":
+          description: Список предложений с флагом «Premium».
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/premium'
+
+        "400":
+          description: Неверный запрос или данные.
+
+        "404":
+            description: Предложение не найдено.
+
+        "500":
+            description: Внутренняя ошибка сервера.
+
+  /favorites:
+    get:
+      tags:
+        - favorites
+      summary: Получение списка всех предложений, добавленных пользователем в избранное.
+      description: Доступено только авторизованным клиентам.
+      responses:
+        "200":
+          description: Список избранных предложений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/premium'
+
+        "401":
+          description: Требуется аутентификация.
+
+        "500":
+          description: Внутренняя ошибка сервера.
+
+      security:
+        - bearerToken: []
+
+  /favorites/{offerId}:
+    post:
+      tags:
+        - favorites
+      summary: Добавление предложения в список избранное пользователя.
+      description: Доступно только авторизованным клиентам.
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          description: ID предложения
+          schema:
+            type: string
+
+      responses:
+        "201":
+          description: Предложение добавлено в избранное
+
+        "400":
+          description: Неверный запрос или данные.
+
+        "401":
+          description: Требуется аутентификация.
+
+        "404":
+          description: Предложение не найдено.
+
+        "500":
+          description: Внутренняя ошибка сервера.
+
+      security:
+        - bearerToken: []
+
+    delete:
+      tags:
+        - favorites
+      summary: Удаление предложения из списка избранных пользователя.
+      description: Доступно только авторизованным клиентам.
+      operationId: removeOfferFromFavorites
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          description: ID предложения
+          schema:
+            type: string
+
+      responses:
+        "204":
+          description: Предложение удалено из избранных
+
+        "400":
+          description: Неверный запрос или данные.
+
+        "401":
+          description: Требуется аутентификация.
+
+        "404":
+          description: Предложение не найдено.
+
+        "500":
+          description: Внутренняя ошибка сервера.
+
+      security:
+        - bearerToken: []
+
+components:
+  schemas:
+    newUser:
+      type: object
+
+      properties:
+        name:
+          type: string
+
+        email:
+          type: string
+
+        avatar:
+          type: string
+          nullable: true
+
+        password:
+          type: string
+
+        typeUser:
+          $ref: '#/components/schemas/userType'
+
+    user:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+        email:
+          type: string
+
+    offer:
+      type: object
+      properties:
+        title:
+          type: string
+
+        description:
+          type: string
+
+        postDate:
+          type: string
+          format: date-time
+
+        city:
+          $ref: '#/components/schemas/city'
+
+        image:
+          type: string
+
+        photos:
+          type: array
+          items:
+            type: string
+
+        isPremium:
+          type: boolean
+
+        isFavourites:
+          type: boolean
+
+        rating:
+          type: number
+
+        typeOfHousing:
+          $ref: '#/components/schemas/offerType'
+
+        roomsCount:
+          type: integer
+
+        guestsCount:
+          type: integer
+
+        price:
+          type: number
+
+        comforts:
+          type: array
+          items:
+            type: string
+
+    premium:
+      offer:
+      type: object
+      properties:
+        price:
+          type: number
+
+        title:
+          type: string
+
+        typeOfHousing:
+          $ref: '#/components/schemas/offerType'
+
+        isFavourites:
+          type: boolean
+
+        postDate:
+          type: string
+          format: date-time
+
+        city:
+          $ref: '#/components/schemas/city'
+
+        image:
+          type: string
+
+        isPremium:
+          type: boolean
+
+        rating:
+          type: number
+
+        commentsCount:
+          type: integer
+
+    city:
+      type: string
+      enum:
+        - Paris
+        - Cologne
+        - Brussels
+        - Amsterdam
+        - Hamburg
+        - Dusseldorf
+
+    offerType:
+      type: string
+      enum:
+        - apartment
+        - house
+        - room
+        - hotel
+
+    userType:
+      type: string
+      enum:
+        - common
+        - pro
+
+    location:
+      type: object
+      properties:
+        latitude:
+          type: number
+        longitude:
+          type: number
+
+    comment:
+      type: object
+      properties:
+        text:
+          type: string
+        postDate:
+          type: string
+          format: date-time
+        rating:
+          type: number
+        user:
+          $ref: '#/components/schemas/user'
+
+  securitySchemes:
+    bearerToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
