@@ -9,14 +9,14 @@ info:
   version: 2.0.0
 
 tags:
-- name: users
-  description: Управление учетными записями пользователей.
-- name: offers
-  description: Управление предложениями об аренде.
-- name: comments
-  description: Добавление комментариев к определённому предложению по аренде.
-- name: favorites
-  description: Управление списком избранных предложений пользователя.
+  - name: users
+    description: Управление учетными записями пользователей.
+  - name: offers
+    description: Управление предложениями об аренде.
+  - name: comments
+    description: Добавление комментариев к определённому предложению по аренде.
+  - name: favorites
+    description: Управление списком избранных предложений пользователя.
 
 paths:
   /registration:
@@ -41,10 +41,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/user'
-
         "400":
           description: Неверный запрос или данные.
-
         "500":
           description: Внутренняя ошибка сервера.
 
@@ -59,13 +57,11 @@ paths:
         description: Информация для аутентификации пользователя.
         content:
           application/json:
-           schema:
+            schema:
               type: object
-
               properties:
                 email:
                   type: string
-
                 password:
                   type: string
 
@@ -96,26 +92,21 @@ paths:
           description: Пользователь авторизован.
           content:
             application/json:
-            schema:
+              schema:
                 type: object
-
                 properties:
-                name:
-                  type: string
-
-                email:
-                  type: string
-
-                avatar:
-                  type: string
-                  nullable: true
-
-                typeUser:
-                  $ref: '#/components/schemas/userType'
-
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  avatar:
+                    type: string
+                    nullable: true
+                  typeUser:
+                    $ref: '#/components/schemas/userType'
         "401":
           description: Пользователь не авторизован или сессия истекла
-          
+
       security:
         - bearerToken: []
 
@@ -127,9 +118,9 @@ paths:
       description: Выход пользователя из системы и завершение сессии. Действие доступно только для авторизованных пользователей.
 
       responses:
-        '204':
+        "204":
           description: Успешный выход из системы
-        '401':
+        "401":
           description: Требуется аутентификация.
 
   /offers:
@@ -145,7 +136,6 @@ paths:
           required: false
           schema:
             type: string
-
         - name: limit
           in: query
           description: Количество возвращаемых предложений
@@ -163,10 +153,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/offer'
-
         "400":
           description: Неверные параметры запроса.
-
         "500":
           description: Внутренняя ошибка сервера.
 
@@ -193,10 +181,8 @@ paths:
                 $ref: '#/components/schemas/offer'
         "400":
            description: Неверный запрос или данные.
-
         "401":
           description: Создавать предложения по аренде могут только авторизованные пользователи.
-
         "500":
           description: Внутренняя ошибка сервера.
 
@@ -213,6 +199,7 @@ paths:
           description: ID предложения
           schema:
             type: string
+
       responses:
         "200":
           description: Детальная информация получена.
@@ -220,17 +207,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/offer'
-
         "400":
           description: Неверный запрос или данные.
-
         "404":
           description: Предложение не найдено.
-
         "500":
           description: Внутренняя ошибка сервера.
 
-    put:
+    patch:
       tags:
         - offers
       summary: Редактирование предложения по аренде.
@@ -257,19 +241,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/offer'
-
         "400":
           description: Неверный запрос или данные.
-
         "401":
           description: Требуется аутентификация.
-
         "403":
           description: Вы не можете отредактировать чужое предложение по аренде.
-
         "404":
           description: Предложение не найдено.
-
         "500":
           description: Внутренняя ошибка сервера.
 
@@ -292,19 +271,14 @@ paths:
       responses:
         "204":
           description: Предложение успешно удалено.
-
         "400":
           description: Неверный запрос или данные.
-
         "401":
           description: Требуется аутентификация.
-
         "403":
           description: Нельзя удалить предложение другого пользователя.
-
         "404":
           description: Предложение не найдено.
-
         "500":
           description: Внутренняя ошибка сервера.
 
@@ -365,16 +339,12 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/comment'
-
           "400":
             description: Неверный запрос или данные.
-
           "401":
             description: Требуется аутентификация.
-
           "404":
             description: Предложение не найдено.
-
           "500":
             description: Внутренняя ошибка сервера.
 
@@ -404,13 +374,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/premium'
-
         "400":
           description: Неверный запрос или данные.
-
         "404":
             description: Предложение не найдено.
-
         "500":
             description: Внутренняя ошибка сервера.
 
@@ -429,10 +396,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/premium'
-
         "401":
           description: Требуется аутентификация.
-
         "500":
           description: Внутренняя ошибка сервера.
 
@@ -456,16 +421,12 @@ paths:
       responses:
         "201":
           description: Предложение добавлено в избранное
-
         "400":
           description: Неверный запрос или данные.
-
         "401":
           description: Требуется аутентификация.
-
         "404":
           description: Предложение не найдено.
-
         "500":
           description: Внутренняя ошибка сервера.
 
@@ -489,16 +450,12 @@ paths:
       responses:
         "204":
           description: Предложение удалено из избранных
-
         "400":
           description: Неверный запрос или данные.
-
         "401":
           description: Требуется аутентификация.
-
         "404":
           description: Предложение не найдено.
-
         "500":
           description: Внутренняя ошибка сервера.
 
@@ -509,21 +466,16 @@ components:
   schemas:
     newUser:
       type: object
-
       properties:
         name:
           type: string
-
         email:
           type: string
-
         avatar:
           type: string
           nullable: true
-
         password:
           type: string
-
         typeUser:
           $ref: '#/components/schemas/userType'
 
@@ -533,7 +485,6 @@ components:
         id:
           type: string
           example: 6329c3d6a04ab1061c6425ea
-
         email:
           type: string
 
@@ -542,46 +493,33 @@ components:
       properties:
         title:
           type: string
-
         description:
           type: string
-
         postDate:
           type: string
           format: date-time
-
         city:
           $ref: '#/components/schemas/city'
-
         image:
           type: string
-
         photos:
           type: array
           items:
             type: string
-
         isPremium:
           type: boolean
-
         isFavourites:
           type: boolean
-
         rating:
           type: number
-
         typeOfHousing:
           $ref: '#/components/schemas/offerType'
-
         roomsCount:
           type: integer
-
         guestsCount:
           type: integer
-
         price:
           type: number
-
         comforts:
           type: array
           items:
@@ -593,32 +531,23 @@ components:
       properties:
         price:
           type: number
-
         title:
           type: string
-
         typeOfHousing:
           $ref: '#/components/schemas/offerType'
-
         isFavourites:
           type: boolean
-
         postDate:
           type: string
           format: date-time
-
         city:
           $ref: '#/components/schemas/city'
-
         image:
           type: string
-
         isPremium:
           type: boolean
-
         rating:
           type: number
-
         commentsCount:
           type: integer
 
