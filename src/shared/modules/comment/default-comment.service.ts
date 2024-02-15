@@ -33,7 +33,6 @@ export class DefaultCommentService implements CommentService {
           }
         },
         { $unwind: '$userId'},
-        { $project: { name: 1, avatar: 1} },
         { $sort: { createdAt: SortType.Down } },
         { $limit: limit }
       ])
