@@ -57,3 +57,8 @@ export const RETRY = {
   TIMEOUT: 1000,
 } as const;
 
+export enum OFFER_LIMITS {
+  OFFER_COUNT = 60,
+  COMMENTS_COUNT = 50,
+  PREMIUM_COUNT = 3
+}
