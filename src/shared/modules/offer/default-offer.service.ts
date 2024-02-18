@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { Component, SortType } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { DocumentType, types } from '@typegoose/typegoose';
-import { OfferEntity, CreateOfferDto, OfferService, UpdateOfferDto } from './index.js';
+import { OfferEntity, CreateOfferDto, OfferService, UpdateOfferDto } from '../index.js';
 import { OFFER_LIMITS } from '../../constants/index.js';
 import mongoose from 'mongoose';
 import { PipelineStage } from 'mongoose';
@@ -54,6 +54,54 @@ export class DefaultOfferService implements OfferService {
     }
   }
 
+  public async find(count?: number): Promise<DocumentType<OfferEntity>[]> {
+    const limit = count ?? OFFER_LIMITS.OFFER_COUNT;
+    return this.offerModel
+      .aggregate([
+        {
+          $lookup: {
+            from: 'comments',
+            localField: '_id',
+            foreignField: 'offerId',
+            as: 'comments',
+          },
+        },
+        {
+          $addFields: {
+            commentCount: {
+              $size: '$comments',
+            },
+            rating: {
+              $avg: '$comments.rating',
+            },
+            publicationDate: '$createdAt',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $unwind: {
+            path: '$user',
+          },
+        },
+        {
+          $sort: {
+            createdAt: SortType.Down,
+          },
+        },
+        {
+          $limit: limit,
+        },
+      ])
+      .exec();
+  }
+
   public async findByCity(city: string, count?: number): Promise<DocumentType<OfferEntity>[]> {
     const limit = count ?? OFFER_LIMITS.OFFER_COUNT;
     return this.offerModel
@@ -62,23 +110,7 @@ export class DefaultOfferService implements OfferService {
       .exec();
   }
 
-  public async incCommentCountAndUpdateRating(offerId: string, newRating: number): Promise<DocumentType<OfferEntity> | null> {
-    const offer = await this.offerModel.findById(offerId);
-    if (!offer) {
-      throw new Error('Offer not found');
-    }
-    const totalRating = (offer.rating * offer.commentCount + newRating) / (offer.commentCount + 1);
-    return this.offerModel
-      .findByIdAndUpdate(offerId, {
-        $inc: { commentCount: 1 },
-        $set: { rating: totalRating },
-      },
-      { new: true }
-      )
-      .exec();
-  }
-
-  public async getPremiumOffersByCity(city: string, limit: number = OFFER_LIMITS.PREMIUM_COUNT): Promise<DocumentType<OfferEntity>[]> {
+  public async findPremiumByCity(city: string, limit: number = OFFER_LIMITS.PREMIUM_COUNT): Promise<DocumentType<OfferEntity>[]> {
     try {
       const offers = await this.offerModel
         .find({city: city}, {isPremium: true})

@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { Component, SortType } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { DocumentType, types } from '@typegoose/typegoose';
-import { CommentEntity, CreateCommentDto, CommentService } from './index.js';
+import { CommentEntity, CreateCommentDto, CommentService } from '../index.js';
 import {OFFER_LIMITS} from '../../constants/index.js';
 
 @injectable()
