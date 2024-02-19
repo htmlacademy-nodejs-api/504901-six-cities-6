@@ -19,7 +19,7 @@ tags:
     description: Управление списком избранных предложений пользователя.
 
 paths:
-  /registration:
+  users/registration:
     post:
       tags:
         - users
@@ -41,10 +41,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/user'
-        "400":
-          description: Неверный запрос или данные.
-        "500":
-          description: Внутренняя ошибка сервера.
+        "409":
+          description: Пользователь с таким email уже существует.
 
   /users/login:
     post:
@@ -80,7 +78,7 @@ paths:
         "500":
           description: Внутренняя ошибка сервера.
         required: true
-
+  /users/auth:
     get:
       tags:
         - users
@@ -110,7 +108,7 @@ paths:
       security:
         - bearerToken: []
 
-  /users/logout/:
+  /users/logout:
     get:
       tags:
         - users
