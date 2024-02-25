@@ -50,8 +50,8 @@ export class OfferController extends BaseController {
       method: HttpMethod.Get,
       handler: this.show,
       middlewares: [
-        new ValidateObjectIdMiddleware('id'),
-        new DocumentExistsMiddleware(this.offerService, 'offer', 'id'),
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'offer', 'offerId'),
       ],
     });
 
@@ -60,9 +60,9 @@ export class OfferController extends BaseController {
       method: HttpMethod.Patch,
       handler: this.update,
       middlewares: [
-        new ValidateObjectIdMiddleware('id'),
+        new ValidateObjectIdMiddleware('offerId'),
         new ValidateDtoMiddleware(UpdateOfferDto),
-        new DocumentExistsMiddleware(this.offerService, 'offer', 'id'),
+        new DocumentExistsMiddleware(this.offerService, 'offer', 'offerId'),
       ],
     });
 
@@ -71,8 +71,8 @@ export class OfferController extends BaseController {
       method: HttpMethod.Delete,
       handler: this.delete,
       middlewares: [
-        new ValidateObjectIdMiddleware('id'),
-        new DocumentExistsMiddleware(this.offerService, 'offer', 'id'),
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'offer', 'offerId'),
       ],
     });
 
