@@ -1,0 +1,45 @@
+# Пользователи
+## Создание нового пользователя
+
+POST http://localhost:5000/users/registration HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Star",
+  "email": "keks@mail.ru",
+  "password": "123456",
+  "userType":"pro"
+}
+
+###
+
+## Вход в закрытую часть
+
+POST http://localhost:5000/users/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "keks@mail.ru",
+  "password": "123456"
+}
+
+###
+
+## Проверка состояния пользователя
+
+GET http://localhost:5000/users/auth HTTP/1.1
+Content-Type: application/json
+
+###
+
+## Отправить изображение
+
+POST http://localhost:5000/users/65db3ef34a5c8c8b4e0df3fd/avatar HTTP/1.1
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="avatar"; filename="octopus-64x64.png"
+Content-Type: image/jpg
+
+< D:/avatar1.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--

@@ -15,7 +15,7 @@ export class ImportCommand implements Command {
   private offerService: OfferService;
   private databaseClient: DatabaseClient;
   private logger: Logger;
-  private salt!: string;
+  //private salt!: string;
 
   constructor() {
     this.onImportedLine = this.onImportedLine.bind(this);
@@ -42,7 +42,7 @@ export class ImportCommand implements Command {
     const user = await this.userService.findOrCreate({
       ...offer.user,
       password: DEFAULT_USER_PASSWORD
-    }, this.salt);
+    });
 
     await this.offerService.create({
       userId: user.id,
@@ -72,10 +72,10 @@ export class ImportCommand implements Command {
     host: string = process.env.DB_HOST as string,
     port: string = process.env.DB_PORT as string,
     dbname: string = process.env.DB_NAME as string,
-    salt: string = process.env.SALT as string
+    //salt: string = process.env.SALT as string
   ): Promise<void> {
     const uri = getMongoURI(login, password, host, port, dbname);
-    this.salt = salt;
+    //this.salt = salt;
 
     await this.databaseClient.connect(uri);
 
