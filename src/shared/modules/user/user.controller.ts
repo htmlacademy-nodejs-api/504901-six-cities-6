@@ -23,7 +23,6 @@ export class UserController extends BaseController {
 
     this.addRoute({ path: '/registration', method: HttpMethod.Post, handler: this.create });
     this.addRoute({ path: '/login', method: HttpMethod.Post, handler: this.login });
-    this.addRoute({ path: '/logout/', method: HttpMethod.Post, handler: this.logout });
     this.addRoute({ path: '/auth/', method: HttpMethod.Get, handler: this.auth });
   }
 
@@ -64,10 +63,6 @@ export class UserController extends BaseController {
       'Not implemented',
       'UserController',
     );
-  }
-
-  public async logout(_req: Request, _res: Response): Promise<void> {
-    throw new HttpError(StatusCodes.NOT_IMPLEMENTED, 'Not implemented', 'UserController');
   }
 
   public async auth(_req: Request, _res: Response): Promise<void> {

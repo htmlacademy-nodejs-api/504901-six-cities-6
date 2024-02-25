@@ -1,8 +1,23 @@
 import { inject, injectable } from 'inversify';
-import { BaseController, HttpError, HttpMethod } from '../../libs/rest/index.js';
+import { BaseController,
+  HttpError,
+  HttpMethod,
+  RequestQuery,
+  ValidateObjectIdMiddleware,
+  ValidateDtoMiddleware,
+  DocumentExistsMiddleware
+} from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
-import { CreateOfferRequest, OfferService, OfferRdo, UpdateOfferRequest } from '../index.js';
+import {
+  CreateOfferRequest,
+  OfferService,
+  OfferRdo,
+  UpdateOfferDto,
+  CreateOfferDto,
+  ParamOfferId,
+  ParamCity
+} from '../index.js';
 import { Request, Response } from 'express';
 import { fillDTO } from '../../helpers/index.js';
 import { StatusCodes } from 'http-status-codes';
@@ -17,62 +32,96 @@ export class OfferController extends BaseController {
 
     this.logger.info('Register routes for OfferController...');
 
-    this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create });
-    this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
-    this.addRoute({ path: '/:id/', method: HttpMethod.Get, handler: this.findById });
-    this.addRoute({ path: '/:id/', method: HttpMethod.Patch, handler: this.update });
-    this.addRoute({ path: '/:id/', method: HttpMethod.Delete, handler: this.delete });
-    this.addRoute({ path: '/:city/', method: HttpMethod.Delete, handler: this.findByCity });
-    this.addRoute({ path: '/:city/premium', method: HttpMethod.Delete, handler: this.findPremiumByCity });
+    this.addRoute({
+      path: '/',
+      method: HttpMethod.Post,
+      handler: this.create,
+      middlewares: [new ValidateDtoMiddleware(CreateOfferDto)],
+    });
+
+    this.addRoute({
+      path: '/',
+      method: HttpMethod.Get,
+      handler: this.index
+    });
+
+    this.addRoute({
+      path: '/:offerId/',
+      method: HttpMethod.Get,
+      handler: this.show,
+      middlewares: [
+        new ValidateObjectIdMiddleware('id'),
+        new DocumentExistsMiddleware(this.offerService, 'offer', 'id'),
+      ],
+    });
+
+    this.addRoute({
+      path: '/:offerId/',
+      method: HttpMethod.Patch,
+      handler: this.update,
+      middlewares: [
+        new ValidateObjectIdMiddleware('id'),
+        new ValidateDtoMiddleware(UpdateOfferDto),
+        new DocumentExistsMiddleware(this.offerService, 'offer', 'id'),
+      ],
+    });
+
+    this.addRoute({
+      path: '/:offerId/',
+      method: HttpMethod.Delete,
+      handler: this.delete,
+      middlewares: [
+        new ValidateObjectIdMiddleware('id'),
+        new DocumentExistsMiddleware(this.offerService, 'offer', 'id'),
+      ],
+    });
+
+    this.addRoute({
+      path: '/:city/',
+      method: HttpMethod.Get,
+      handler: this.findByCity
+    });
+
+    this.addRoute({
+      path: '/:city/premium',
+      method: HttpMethod.Get,
+      handler: this.findPremiumByCity
+    });
   }
 
   public async create({ body }: CreateOfferRequest, res: Response): Promise<void> {
     const result = await this.offerService.create(body);
-    this.created(res, fillDTO(OfferRdo, result));
+    const offer = await this.offerService.findById(result.id);
+    this.created(res, fillDTO(OfferRdo, offer));
   }
 
-  public async index(_req: Request, res: Response): Promise<void> {
-    const offers = await this.offerService.find();
-    const responseData = fillDTO(OfferRdo, offers);
-    this.ok(res, responseData);
+  public async index({ query }: Request<unknown, unknown, unknown, RequestQuery>, res: Response): Promise<void> {
+    const { limit } = query;
+    const offers = await this.offerService.find(!isNaN(Number(limit)) ? Number(limit) : undefined);
+    this.ok(res, fillDTO(OfferRdo, offers));
   }
 
-  public async findById({ params }: Request, res: Response): Promise<void> {
-    const existsOffer = await this.offerService.findById(params.id);
-
-    if (!existsOffer) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        `Offer with the specified ID:«${params.id}» not found.`,
-        'OfferController',
-      );
-    }
-
-    this.ok(res, fillDTO(OfferRdo, existsOffer));
+  public async show({ params }: Request<ParamOfferId>, res: Response): Promise<void> {
+    const { offerId } = params;
+    const offer = await this.offerService.findById(offerId);
+    this.ok(res, fillDTO(OfferRdo, offer));
   }
 
-  public async update({ body, params }: UpdateOfferRequest, res: Response): Promise<void> {
-    const offer = await this.offerService.updateById(String(params.id), body);
-    const responseData = fillDTO(OfferRdo, offer);
-    this.ok(res, responseData);
+  public async update({ body, params }: Request<ParamOfferId, unknown, UpdateOfferDto>, res: Response): Promise<void> {
+    const offer = await this.offerService.updateById(String(params.offerId), body);
+    this.ok(res, fillDTO(OfferRdo, offer));
   }
 
-  public async delete({ params }: Request, res: Response): Promise<void> {
-    const existsOffer = await this.offerService.deleteById(params.id);
-
-    if (!existsOffer) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        `Offer with the specified ID:«${params.id}» not found.`,
-        'OfferController',
-      );
-    }
-
-    this.noContent(res, existsOffer);
+  public async delete({ params }: Request<ParamOfferId>, res: Response): Promise<void> {
+    const { offerId } = params;
+    const offer = await this.offerService.deleteById(offerId);
+    this.noContent(res, offer);
   }
 
-  public async findByCity({ params }: Request, res: Response): Promise<void> {
-    const existsOffer = await this.offerService.findByCity(params.city);
+  public async findByCity({ params, query }: Request<ParamCity, unknown, unknown, RequestQuery>, res: Response): Promise<void> {
+    const { city } = params;
+    const { limit } = query;
+    const existsOffer = await this.offerService.findByCity(city, !isNaN(Number(limit)) ? Number(limit) : undefined);
 
     if (!existsOffer) {
       throw new HttpError(

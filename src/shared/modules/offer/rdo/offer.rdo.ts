@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import {
   TypeOfHousing,
   Location
@@ -54,7 +54,8 @@ export class OfferRdo {
   @Expose()
   public commentCount!: number;
 
-  @Expose()
+  @Expose({ name: 'userId'})
+  @Type(() => UserRdo)
   public user!: UserRdo;
 
   @Expose()

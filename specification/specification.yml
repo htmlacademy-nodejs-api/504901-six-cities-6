@@ -108,19 +108,6 @@ paths:
       security:
         - bearerToken: []
 
-  /users/logout:
-    get:
-      tags:
-        - users
-      summary: Завершение пользовательского сеанса
-      description: Выход пользователя из системы и завершение сессии. Действие доступно только для авторизованных пользователей.
-
-      responses:
-        "204":
-          description: Успешный выход из системы
-        "401":
-          description: Требуется аутентификация.
-
   /offers:
     get:
       tags:
@@ -129,7 +116,7 @@ paths:
       description: По умолчанию сервис возвращает не больше 60 предложений по аренде. Клиент может запросить больше предложений, указав нужное количество в параметре запроса
       parameters:
         - name: city
-          in: query
+          in: path
           description: Название города для фильтрации предложений
           required: false
           schema:
@@ -284,70 +271,70 @@ paths:
         - bearerToken: []
 
   /comments/{offerId}:
-      get:
-        tags:
-          - comments
-        summary: Получение списка комментариев, связанных с определённым предложением об аренде.
-        description: Сервис всегда возвращает список из 50 (или меньше) последних комментариев. Комментарии отсортированы по дате публикации (по убыванию). Комментарии могут запрашивать авторизованные и анонимные клиенты.
-        parameters:
-          - name: offerId
-            in: path
-            required: true
-            description: ID предложения
-            schema:
-              type: string
-
-        responses:
-          "200":
-            description: Список комментариев
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/comment'
-          "404":
-            description: Предложение не найдено.
-          '500':
-            description: Внутренняя ошибка сервера.
-      post:
-        tags:
-          - comments
-        summary: Добавление нового комментария к предложению об аренде.
-        description: Добавлять комментарии могут только авторизованные клиенты.
-        parameters:
-          - name: offerId
-            in: path
-            required: true
-            description: ID предложения
-            schema:
-              type: string
-
-        requestBody:
+    get:
+      tags:
+        - comments
+      summary: Получение списка комментариев, связанных с определённым предложением об аренде.
+      description: Сервис всегда возвращает список из 50 (или меньше) последних комментариев. Комментарии отсортированы по дате публикации (по убыванию). Комментарии могут запрашивать авторизованные и анонимные клиенты.
+      parameters:
+        - name: offerId
+          in: path
           required: true
+          description: ID предложения
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Список комментариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                $ref: '#/components/schemas/comment'
+        "404":
+          description: Предложение не найдено.
+        '500':
+          description: Внутренняя ошибка сервера.
+    post:
+      tags:
+        - comments
+      summary: Добавление нового комментария к предложению об аренде.
+      description: Добавлять комментарии могут только авторизованные клиенты.
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          description: ID предложения
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/comment'
+
+      responses:
+        "201":
+          description: Комментарий успешно добавлен
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/comment'
+        "400":
+          description: Неверный запрос или данные.
+        "401":
+          description: Требуется аутентификация.
+        "404":
+          description: Предложение не найдено.
+        "500":
+          description: Внутренняя ошибка сервера.
 
-        responses:
-          "201":
-            description: Комментарий успешно добавлен
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/comment'
-          "400":
-            description: Неверный запрос или данные.
-          "401":
-            description: Требуется аутентификация.
-          "404":
-            description: Предложение не найдено.
-          "500":
-            description: Внутренняя ошибка сервера.
-
-        security:
-          - bearerToken: []
+      security:
+        - bearerToken: []
 
   /offers/city/premium:
     get:

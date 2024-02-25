@@ -8,7 +8,6 @@ export interface Offer {
   image: string;
   photos: string[];
   isPremium: boolean;
-  isFavourites: boolean;
   rating: number;
   typeOfHousing: TypeOfHousing;
   roomsCount: number;

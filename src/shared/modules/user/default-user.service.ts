@@ -16,10 +16,11 @@ export class DefaultUserService implements UserService {
     //@inject(Component.OfferService) private readonly offerService: DefaultOfferService,
   ) {}
 
-  public async create(dto: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>> {
+  //public async create(dto: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>> {
+  public async create(dto: CreateUserDto): Promise<DocumentType<UserEntity>> {
     try {
       const user = new UserEntity(dto);
-      user.setPassword(dto.password, salt);
+      //user.setPassword(dto.password, salt); //вынести в конструктор
 
       const result = await this.userModel.create(user);
       this.logger.info(`New user created: ${user.email}`);
@@ -37,14 +38,15 @@ export class DefaultUserService implements UserService {
     return this.userModel.findOne({email});
   }
 
-  public async findOrCreate(dto: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>> {
+  public async findOrCreate(dto: CreateUserDto): Promise<DocumentType<UserEntity>> {
     const existedUser = await this.findByEmail(dto.email);
 
     if (existedUser) {
       return existedUser;
     }
 
-    return this.create(dto, salt);
+    //return this.create(dto, salt);
+    return this.create(dto);
   }
 
   public async findById(id: string): Promise<DocumentType<UserEntity> | null> {

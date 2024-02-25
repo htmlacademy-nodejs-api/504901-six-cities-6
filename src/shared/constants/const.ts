@@ -1,31 +1,62 @@
 import { City } from '../types/index.js';
 import { Location } from '../types/index.js';
 
-export enum PRICE {
+export enum USER_NAME_CONSTRAINT {
+  MIN = 1,
+  MAX = 15
+}
+
+export enum PASSWORD_CONSTRAINT {
+  MIN = 6,
+  MAX = 12
+}
+
+export enum TITLE_CONSTRAINT {
+  MIN = 10,
+  MAX = 100
+}
+
+export enum DESCRIPTION_CONSTRAINT {
+  MIN = 20,
+  MAX = 1024
+}
+export enum PRICE_CONSTRAINT {
   MIN = 100,
   MAX = 100000
 }
 
-export enum RATING {
+export enum RATING_CONSTRAINT {
   MIN = 1,
   MAX = 5
 }
 
 export const RATING_PRECISION = 1;
 
-export enum ROOMS {
+export const PHOTOS_COUNT = 6;
+
+export enum ROOMS_CONSTRAINT {
   MIN = 1,
   MAX = 8
 }
 
-export enum GUESTS {
+export enum GUESTS_CONSTRAINT {
   MIN = 1,
   MAX = 10
 }
 
+export enum COMMENT_TEXT_CONSTRAINT {
+  MIN = 5,
+  MAX = 1024
+}
+
+export enum COMMENT_RAITING_CONSTRAINT {
+  MIN = 1,
+  MAX = 5
+}
+
 export const CHUNK_SIZE = 16384;
 
-export const cities: Record<City, Location> = {
+export const CITIES: Record<City, Location> = {
   [City.Paris]: {
     latitude: 48.85661,
     longitude: 2.351499
@@ -52,7 +83,7 @@ export const cities: Record<City, Location> = {
   },
 } as const;
 
-export const RETRY = {
+export const RETRY_OPTIONS = {
   COUNT: 5,
   TIMEOUT: 1000,
 } as const;
