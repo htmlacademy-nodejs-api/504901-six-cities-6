@@ -13,6 +13,21 @@ Content-Type: application/json
 
 ###
 
+## Создание нового пользователя неправильный тип файла
+
+POST http://localhost:5000/users/registration HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Star",
+  "email": "keks1@mail.ru",
+  "password": "123456",
+  "avatar": "bad.svg",
+  "userType":"pro"
+}
+
+###
+
 ## Вход в закрытую часть
 
 POST http://localhost:5000/users/login HTTP/1.1
@@ -27,8 +42,10 @@ Content-Type: application/json
 
 ## Проверка состояния пользователя
 
-GET http://localhost:5000/users/auth HTTP/1.1
+GET http://localhost:5000/users/login HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Imtla3NAbWFpbC5ydSIsIm5hbWUiOiJTdGFyIiwiaWQiOiI2NWRiM2VmMzRhNWM4YzhiNGUwZGYzZmQiLCJpYXQiOjE3MDg5NjMyNTUsImV4cCI6MTcwOTEzNjA1NX0.0nmy1fFLnTNRdT3oxGOb9wjDi4P9ilfzsBffIajzP1s
+
 
 ###
 

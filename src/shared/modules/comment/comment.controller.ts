@@ -1,10 +1,24 @@
 import { inject, injectable } from 'inversify';
 import { Response, Request } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { BaseController, DocumentExistsMiddleware, HttpError, HttpMethod, ValidateDtoMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
+import {
+  BaseController,
+  DocumentExistsMiddleware,
+  HttpError,
+  HttpMethod,
+  RequestQuery,
+  ValidateDtoMiddleware,
+  ValidateObjectIdMiddleware,
+  PrivateRouteMiddleware
+} from '../../libs/rest/index.js';
 import { Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
-import { CommentService, OfferService, CreateCommentDto, ParamOfferId } from '../index.js';
+import {
+  CommentService,
+  OfferService,
+  CreateCommentDto,
+  ParamOfferId
+} from '../index.js';
 import { fillDTO } from '../../helpers/index.js';
 import { CommentRdo } from './rdo/comment.rdo.js';
 import { CreateCommentRequest } from './type/create-comment-request.type.js';
@@ -24,6 +38,7 @@ export class CommentController extends BaseController {
       method: HttpMethod.Post,
       handler: this.create,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new ValidateDtoMiddleware(CreateCommentDto)
       ]
     });
@@ -40,7 +55,7 @@ export class CommentController extends BaseController {
   }
 
   public async create(
-    { body }: CreateCommentRequest,
+    { body, tokenPayload }: CreateCommentRequest,
     res: Response
   ): Promise<void> {
 
@@ -52,13 +67,15 @@ export class CommentController extends BaseController {
       );
     }
 
-    const comment = await this.commentService.create(body);
+    const comment = await this.commentService.create({...body, userId: tokenPayload.id});
     await this.offerService.incCommentCount(body.offerId);
     this.created(res, fillDTO(CommentRdo, comment));
   }
 
-  public async getComments({ params }: Request<ParamOfferId>, res: Response): Promise<void> {
-    const comments = await this.commentService.findByOfferId(params.offerId);
-    this.ok(res, fillDTO(CommentRdo, comments));
+  public async getComments({ params, query }: Request<ParamOfferId, unknown, unknown, RequestQuery>, res: Response): Promise<void> {
+    const { offerId } = params;
+    const { limit } = query;
+    const comments = await this.commentService.findByOfferId(offerId, limit);
+    this.created(res, fillDTO(CommentRdo, comments));
   }
 }
