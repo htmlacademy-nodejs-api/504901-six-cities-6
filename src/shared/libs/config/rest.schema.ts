@@ -13,6 +13,7 @@ export type RestSchema = {
   DB_NAME: string;
   UPLOAD_DIRECTORY: string;
   JWT_SECRET: string;
+  JWT_EXPIRED: string;
 }
 
 export const configRestSchema = convict<RestSchema>({
@@ -68,6 +69,12 @@ export const configRestSchema = convict<RestSchema>({
     doc: 'Secret for sign JWT',
     format: String,
     env: 'JWT_SECRET',
+    default: null
+  },
+  JWT_EXPIRED: {
+    doc: 'Token lifetime',
+    format: String,
+    env: 'JWT_EXPIRED',
     default: null
   },
 });

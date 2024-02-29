@@ -6,4 +6,5 @@ export class LoggedUserRdo {
 
   @Expose()
   public email!: string;
+
 }

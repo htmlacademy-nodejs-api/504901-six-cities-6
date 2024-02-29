@@ -4,16 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { createSecretKey } from 'node:crypto';
 import { Middleware } from './middleware.interface.js';
 import { HttpError } from '../errors/index.js';
-import { TokenPayload } from '../../../modules/auth/index.js';
-
-function isTokenPayload(payload: unknown): payload is TokenPayload {
-  return (
-    (typeof payload === 'object' && payload !== null) &&
-    ('email' in payload && typeof payload.email === 'string') &&
-    ('name' in payload && typeof payload.name === 'string') &&
-    ('id' in payload && typeof payload.id === 'string')
-  );
-}
+import { isTokenPayload } from '../../../modules/auth/index.js';
 
 export class ParseTokenMiddleware implements Middleware {
   constructor(private readonly jwtSecret: string) {}

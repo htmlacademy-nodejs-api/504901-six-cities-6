@@ -8,7 +8,7 @@ import { LoginUserDto, UserEntity, UserService } from '../index.js';
 import { TokenPayload } from './types/TokenPayload.js';
 import { Config, RestSchema } from '../../libs/config/index.js';
 import { UserNotFoundException, UserPasswordIncorrectException } from './errors/index.js';
-import { JWT_ALGORITHM, JWT_EXPIRED } from './auth.constant.js';
+import { JWT_ALGORITHM } from './auth.constant.js';
 
 @injectable()
 export class DefaultAuthService implements AuthService {
@@ -19,8 +19,7 @@ export class DefaultAuthService implements AuthService {
   ) {}
 
   public async authenticate(user: UserEntity): Promise<string> {
-    const jwtSecret = this.config.get('JWT_SECRET');
-    const secretKey = crypto.createSecretKey(jwtSecret, 'utf-8');
+    const secretKey = crypto.createSecretKey(this.config.get('JWT_SECRET'), 'utf-8');
     const tokenPayload: TokenPayload = {
       email: user.email,
       name: user.name,
@@ -31,7 +30,7 @@ export class DefaultAuthService implements AuthService {
     return new SignJWT(tokenPayload)
       .setProtectedHeader({ alg: JWT_ALGORITHM })
       .setIssuedAt()
-      .setExpirationTime(JWT_EXPIRED)
+      .setExpirationTime(this.config.get('JWT_EXPIRED'))
       .sign(secretKey);
   }
 
