@@ -67,48 +67,8 @@ export class DefaultOfferService implements OfferService {
   public async find(count?: number): Promise<DocumentType<OfferEntity>[]> {
     const limit = count ?? OFFER_LIMITS.OFFER_COUNT;
     return this.offerModel
-      .aggregate([
-        {
-          $lookup: {
-            from: 'comments',
-            localField: '_id',
-            foreignField: 'offerId',
-            as: 'comments',
-          },
-        },
-        {
-          $addFields: {
-            commentCount: {
-              $size: '$comments',
-            },
-            rating: {
-              $avg: '$comments.rating',
-            },
-            publicationDate: '$createdAt',
-          },
-        },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'userId',
-            foreignField: '_id',
-            as: 'user',
-          },
-        },
-        {
-          $unwind: {
-            path: '$user',
-          },
-        },
-        {
-          $sort: {
-            createdAt: SortType.Down,
-          },
-        },
-        {
-          $limit: limit,
-        },
-      ])
+      .find({}, {}, {limit: limit})
+      .sort({ createdAt: SortType.Down })
       .exec();
   }
 

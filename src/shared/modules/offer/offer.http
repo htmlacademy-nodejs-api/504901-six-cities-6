@@ -1,0 +1,78 @@
+# Офферы
+
+## Список предложений по аренде
+
+GET http://localhost:5000/offers/ HTTP/1.1
+Content-Type: application/json
+
+###
+## Создание нового предложения
+
+POST http://localhost:5000/offers/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Imtla3NAbWFpbC5ydSIsIm5hbWUiOiJTdGFyIiwiaWQiOiI2NWRiM2VmMzRhNWM4YzhiNGUwZGYzZmQiLCJpYXQiOjE3MDg5NjMyNTUsImV4cCI6MTcwOTEzNjA1NX0.0nmy1fFLnTNRdT3oxGOb9wjDi4P9ilfzsBffIajzP1s
+
+{
+  "title": "Wood and stone",
+  "description": "Комплекс апартаментов",
+  "city": "Paris",
+  "image": "photo6.jpg",
+  "postDate": "2024-02-26T22:49:23.123+03:00",
+  "photos": [
+    "photo7.jpg",
+    "photo8.jpg",
+    "photo9.jpg",
+    "photo10.jpg",
+    "photo11.jpg",
+    "photo12.jpg"
+  ],
+  "isPremium": true,
+  "typeOfHousing": "apartment",
+  "roomsCount": 2,
+  "guestsCount": 1,
+  "price": 524,
+  "comforts": [
+    "Washer",
+    "Towels"
+  ],
+  "offerLocation": {
+        "latitude": 53.551024,
+        "longitude": 9.920481
+    }
+}
+
+###
+
+## Детальная информация по предложению. проверить
+
+GET  http://localhost:5000/offers/65dccf7ea1c487e5f9e7847c/ HTTP/1.1
+Content-Type: application/json
+
+###
+
+## Удаление предложения. проверить
+
+DELETE  http://localhost:5000/offers/65d7a521cb9ccc198dc4897b/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Imtla3NAbWFpbC5ydSIsIm5hbWUiOiJTdGFyIiwiaWQiOiI2NWRiM2VmMzRhNWM4YzhiNGUwZGYzZmQiLCJpYXQiOjE3MDg5NjMyNTUsImV4cCI6MTcwOTEzNjA1NX0.0nmy1fFLnTNRdT3oxGOb9wjDi4P9ilfzsBffIajzP1s
+
+###
+
+## Редактирование предложения проверить
+
+PATCH  http://localhost:5000/offers/65cccce5d5219b51301e7297/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Imtla3NAbWFpbC5ydSIsIm5hbWUiOiJTdGFyIiwiaWQiOiI2NWRiM2VmMzRhNWM4YzhiNGUwZGYzZmQiLCJpYXQiOjE3MDg5NjMyNTUsImV4cCI6MTcwOTEzNjA1NX0.0nmy1fFLnTNRdT3oxGOb9wjDi4P9ilfzsBffIajzP1s
+
+{
+  "title": "Luxury Apartment",
+}
+
+###
+
+## Добавление и удаление предложения в/из избранного проверить
+
+PUT  http://localhost:5000/offers/65d795f29a9b8a39835fd095/favorite/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Imtla3NAbWFpbC5ydSIsIm5hbWUiOiJTdGFyIiwiaWQiOiI2NWRiM2VmMzRhNWM4YzhiNGUwZGYzZmQiLCJpYXQiOjE3MDg5NjMyNTUsImV4cCI6MTcwOTEzNjA1NX0.0nmy1fFLnTNRdT3oxGOb9wjDi4P9ilfzsBffIajzP1s
+

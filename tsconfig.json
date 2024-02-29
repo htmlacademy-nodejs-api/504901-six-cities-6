@@ -22,20 +22,21 @@
     "outDir": "./dist",
     "emitDecoratorMetadata": true,
     "types": [
-      "node",
-    ],
-    "lib": [
-      "ESNext"
-    ]
-  },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.test.ts"
-  ],
-  "ts-node": {
-    "esm": true
-  }
+      "node"
+   ],
+   "lib": [
+     "ESNext"
+   ],
+ },
+ "include": [
+   "src/**/*.ts"
+ ],
+ "exclude": [
+   "node_modules",
+   "**/*.test.ts"
+ ],
+ "ts-node": {
+   "esm": true
+ },
+ "files": ["./custom.d.ts"]
 }

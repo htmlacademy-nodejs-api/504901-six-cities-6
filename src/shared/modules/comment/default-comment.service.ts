@@ -16,7 +16,7 @@ export class DefaultCommentService implements CommentService {
     const comment = await this.commentModel.create(dto);
     this.logger.info(`User ${dto.userId} created new comment`);
 
-    return comment.populate('userID');
+    return comment.populate('userId');
   }
 
   public async findByOfferId(offerId: string, count?: number): Promise<DocumentType<CommentEntity>[]> {

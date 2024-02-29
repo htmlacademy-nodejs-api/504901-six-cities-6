@@ -5,7 +5,6 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
-  IsMongoId,
   IsNotEmpty,
   Matches,
   Max,
@@ -78,7 +77,6 @@ export class CreateOfferDto {
   @IsEnum(Comfort, { each: true})
   public comforts!: string[];
 
-  @IsMongoId()
   public userId!: string;
 
   @IsNotEmpty()

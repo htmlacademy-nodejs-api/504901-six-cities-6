@@ -3,7 +3,9 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  Length
+  Length,
+  IsUrl,
+  Matches
 } from 'class-validator';
 import { UserType } from '../../../types/index.js';
 //import { CreateUserMessages } from '../../index.js';
@@ -21,7 +23,8 @@ export class CreateUserDto {
   public email!: string;
 
   @IsOptional()
-  @IsString()
+  @IsUrl()
+  @Matches(/\.(jpg|png)(\?.*)?$/i)
   public avatar?: string;
 
   @Length(PASSWORD_CONSTRAINT.MIN, PASSWORD_CONSTRAINT.MAX)
