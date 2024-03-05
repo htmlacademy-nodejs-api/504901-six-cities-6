@@ -44,7 +44,7 @@ export class DefaultOfferService implements OfferService {
     if (!userOffer.length) {
       throw new HttpError(
         StatusCodes.FORBIDDEN, 'This is not you offer'
-      )
+      );
     }
 
     const offer = await this.offerModel.findByIdAndDelete(offerId).exec();
@@ -66,7 +66,7 @@ export class DefaultOfferService implements OfferService {
     if (!offer.length) {
       throw new HttpError(
         StatusCodes.FORBIDDEN, 'This is not you offer'
-      )
+      );
     }
     return this.offerModel.findByIdAndUpdate(offerId, dto, { new: true }).populate(['userId']).exec();
   }
@@ -77,7 +77,7 @@ export class DefaultOfferService implements OfferService {
   ): Promise<DocumentType<OfferEntity>[]> {
     const limit = count ?? OFFER_LIMITS.OFFER_COUNT;
 
-    const matchStage = town ? { city: town }: {};
+    const matchStage = town ? { city: town } : {};
 
     const aggregationPipeline: PipelineStage[] = [
       { $match: matchStage },
@@ -108,7 +108,7 @@ export class DefaultOfferService implements OfferService {
           'user.id': '$user._id',
         },
       },
-  ];
+    ];
 
     return this.offerModel.aggregate(aggregationPipeline).exec();
   }
@@ -139,12 +139,12 @@ export class DefaultOfferService implements OfferService {
   public async findPremiumByCity(city: string, limit: number = OFFER_LIMITS.PREMIUM_COUNT): Promise<DocumentType<OfferEntity>[]> {
     if (city in City) {
       return this.offerModel
-      .find({city}, {isPremium: true})
-      .sort({ createdAt: SortType.Down })
-      .limit(limit)
-      .exec();
-    }  else {
-        throw new Error(`${city} is wrong`);
+        .find({city}, {isPremium: true})
+        .sort({ createdAt: SortType.Down })
+        .limit(limit)
+        .exec();
+    } else {
+      throw new Error(`${city} is wrong`);
     }
   }
 
@@ -152,21 +152,21 @@ export class DefaultOfferService implements OfferService {
 
     const user = await this.userModel.findById(userId);
     const aggregationPipeline: PipelineStage[] = [];
-      if (user && user.favorites) {
-        aggregationPipeline.unshift({
-          $match: {
-            _id: { $in: user.favorites}
-          }
-        });
-        aggregationPipeline.push({
-          $set: { isFavorite: true }
-        });
-        aggregationPipeline.push(
-          {
-            $project: { title: 1, postDate: 1, city: 1, image: 1, isPremium: 1, rating: 1, typeOfHousing: 1, price: 1 }
-          }
-        );
-      }
+    if (user && user.favorites) {
+      aggregationPipeline.unshift({
+        $match: {
+          _id: { $in: user.favorites}
+        }
+      });
+      aggregationPipeline.push({
+        $set: { isFavorite: true }
+      });
+      aggregationPipeline.push(
+        {
+          $project: { title: 1, postDate: 1, city: 1, image: 1, isPremium: 1, rating: 1, typeOfHousing: 1, price: 1 }
+        }
+      );
+    }
     return this.offerModel.aggregate(aggregationPipeline).exec();
   }
 

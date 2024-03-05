@@ -52,7 +52,7 @@ export class DefaultCommentService implements CommentService {
             'user.id': '$user._id',
           },
         },
-     ]);
+      ]);
   }
 
   public async deleteByOfferId(offerId: string): Promise<number> {

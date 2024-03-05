@@ -120,7 +120,7 @@ export class OfferController extends BaseController {
       throw new HttpError(StatusCodes.BAD_REQUEST, 'Invalid city');
     }
     const count = limit === undefined ? undefined : Number(limit);
-    const town = city?? undefined;
+    const town = city ?? undefined;
     const offers = await this.offerService.find(count, town);
     this.ok(res, fillDTO(OfferRdo, offers));
   }
@@ -157,7 +157,7 @@ export class OfferController extends BaseController {
   }
 
   public async updateFavorite(
-    { params, tokenPayload, body }: Request<ParamOfferId, RequestBody, { isFavorite: string}>, res: Response ): Promise<void> {
+    { params, tokenPayload, body }: Request<ParamOfferId, RequestBody, { isFavorite: string}>, res: Response): Promise<void> {
     const { offerId } = params;
     const userId = tokenPayload.id;
     const isFavorite = body.isFavorite === true.toString();
