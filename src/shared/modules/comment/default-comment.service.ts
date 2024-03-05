@@ -4,6 +4,7 @@ import { Logger } from '../../libs/logger/index.js';
 import { DocumentType, types } from '@typegoose/typegoose';
 import { CommentEntity, CreateCommentDto, CommentService } from '../index.js';
 import {OFFER_LIMITS} from '../../constants/index.js';
+import { Types } from 'mongoose';
 
 @injectable()
 export class DefaultCommentService implements CommentService {
@@ -22,21 +23,36 @@ export class DefaultCommentService implements CommentService {
   public async findByOfferId(offerId: string, count?: number): Promise<DocumentType<CommentEntity>[]> {
     const limit = count ?? OFFER_LIMITS.COMMENTS_COUNT;
     return this.commentModel
-      .find({ offerId })
       .aggregate([
+        { $match: { offerId: new Types.ObjectId(offerId) }},
+        { $sort: { createdAt: SortType.Down }},
+        { $limit: limit },
+        {
+          $set: {
+            publicationDate: '$createdAt',
+            id: '$_id',
+          },
+        },
         {
           $lookup: {
             from: 'users',
             localField: 'userId',
             foreignField: '_id',
-            as: 'userId'
+            as: 'user',
+          },
+        },
+        { $unwind: '$user', },
+        {
+          $addFields: {
+            userId: { $toString: '$user._id'},
           }
         },
-        { $unwind: '$userId'},
-        { $sort: { createdAt: SortType.Down } },
-        { $limit: limit }
-      ])
-      .exec();
+        {
+          $set: {
+            'user.id': '$user._id',
+          },
+        },
+     ]);
   }
 
   public async deleteByOfferId(offerId: string): Promise<number> {

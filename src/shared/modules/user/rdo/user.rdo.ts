@@ -15,5 +15,5 @@ export class UserRdo {
   public email!: string;
 
   @Expose()
-  public avatarUrl!: string;
+  public avatar!: string;
 }
