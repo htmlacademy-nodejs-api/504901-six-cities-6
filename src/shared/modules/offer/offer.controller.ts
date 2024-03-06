@@ -98,6 +98,13 @@ export class OfferController extends BaseController {
         new DocumentExistsMiddleware(this.offerService, 'offer', 'offerId'),
       ],
     });
+
+    this.addRoute({
+      path: '/favorites',
+      method: HttpMethod.Get,
+      handler: this.getFavorites,
+      middlewares: [new PrivateRouteMiddleware()],
+    });
   }
 
   public async create({ body, tokenPayload }: CreateOfferRequest, res: Response): Promise<void> {
@@ -164,5 +171,13 @@ export class OfferController extends BaseController {
     const offer = await this.offerService.toggleFavorites(userId, offerId, isFavorite);
 
     this.ok(res, { isFavorite: offer });
+  }
+
+  public async getFavorites(
+    { tokenPayload: { id: userId } }: Request,
+    res: Response,
+  ): Promise<void> {
+    const offers = await this.offerService.findFavorites(userId);
+    this.ok(res, fillDTO(OfferPartRdo, offers));
   }
 }

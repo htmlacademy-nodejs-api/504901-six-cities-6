@@ -13,7 +13,7 @@ export class DefaultUserService implements UserService {
   ) {}
 
   public async create(dto: CreateUserDto): Promise<DocumentType<UserEntity>> {
-    const user = new UserEntity({ ...dto, avatar: DEFAULT_AVATAR_FILE_NAME });
+    const user = new UserEntity({ ...dto, avatar: dto.avatar || DEFAULT_AVATAR_FILE_NAME });
 
     const result = await this.userModel.create(user);
     this.logger.info(`New user created: ${user.email}`);

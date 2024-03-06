@@ -3,6 +3,9 @@ import {
   IsEnum,
   IsString,
   Length,
+  IsOptional,
+  IsUrl,
+  Matches
 } from 'class-validator';
 import { UserType } from '../../../types/index.js';
 
@@ -24,4 +27,9 @@ export class CreateUserDto {
 
   @IsEnum(UserType)
   public userType!: UserType;
+
+  @IsOptional()
+  @IsUrl()
+  @Matches(/\.(jpg|png)(\?.*)?$/i)
+  public avatar?: string;
 }
