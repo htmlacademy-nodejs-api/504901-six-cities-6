@@ -1,11 +1,11 @@
 import { inject, injectable } from 'inversify';
 import * as crypto from 'node:crypto';
 import { SignJWT } from 'jose';
-import { AuthService } from './auth-service.interface.js';
+import { AuthService } from './index.js';
 import { Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { LoginUserDto, UserEntity, UserService } from '../index.js';
-import { TokenPayload } from './types/TokenPayload.js';
+import { TokenPayload } from './types/token-payload.type.js';
 import { Config, RestSchema } from '../../libs/config/index.js';
 import { UserNotFoundException, UserPasswordIncorrectException } from './errors/index.js';
 import { JWT_ALGORITHM } from './auth.constant.js';

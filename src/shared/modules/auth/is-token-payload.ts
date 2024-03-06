@@ -1,4 +1,4 @@
-import { TokenPayload } from '../index.js';
+import { TokenPayload } from './index.js';
 
 export function isTokenPayload(payload: unknown): payload is TokenPayload {
   return (

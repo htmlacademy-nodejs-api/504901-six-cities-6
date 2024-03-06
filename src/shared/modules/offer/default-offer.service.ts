@@ -205,5 +205,25 @@ export class DefaultOfferService implements OfferService {
     }
   }
 
-
+  public async findFavorites(userId: string): Promise<DocumentType<OfferEntity>[]> {
+    return await this.offerModel.aggregate<DocumentType<OfferEntity>>([
+      {
+        $lookup: {
+          from: 'users',
+          let: { offerId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: [{ $convert: { input: '$_id', to: 'string' } }, userId] } } },
+            { $match: { $expr: { $in: [{ $convert: { input: '$$offerId', to: 'string' } }, '$favourites'] } } },
+          ],
+          as: 'favourites'
+        }
+      },
+      {
+        $addFields: {
+          isFavourite: userId ? { $toBool: { $size: '$favourites'} } : false
+        }
+      },
+      { $sort: { createdAt: SortType.Down }},
+    ]).exec();
+  }
 }

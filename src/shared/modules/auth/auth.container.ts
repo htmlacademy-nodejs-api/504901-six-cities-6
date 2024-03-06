@@ -1,5 +1,5 @@
 import { Container } from 'inversify';
-import { AuthService } from './auth-service.interface.js';
+import { AuthService } from './index.js';
 import { Component } from '../../types/index.js';
 import { DefaultAuthService } from './default-auth.service.js';
 import { ExceptionFilter } from '../../libs/rest/index.js';

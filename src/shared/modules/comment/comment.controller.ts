@@ -21,7 +21,7 @@ import {
 } from '../index.js';
 import { fillDTO } from '../../helpers/index.js';
 import { CommentRdo } from './rdo/comment.rdo.js';
-import { CreateCommentRequest } from './type/create-comment-request.type.js';
+import { CreateCommentRequest } from './types/create-comment-request.type.js';
 
 @injectable()
 export class CommentController extends BaseController {
