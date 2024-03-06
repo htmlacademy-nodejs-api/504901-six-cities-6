@@ -6,7 +6,7 @@ import { DefaultOfferService, OfferModel, OfferService } from '../../shared/modu
 import { DatabaseClient, MongoDatabaseClient } from '../../shared/libs/database-client/index.js';
 import { Logger } from '../../shared/libs/logger/index.js';
 import { ConsoleLogger } from '../../shared/libs/logger/console.logger.js';
-import { DefaultUserService, UserModel } from '../../shared/modules/index.js';
+import { DefaultUserService, UserModel, CommentModel } from '../../shared/modules/index.js';
 import { DEFAULT_USER_PASSWORD } from './command.constant.js';
 import { Offer } from '../../shared/types/index.js';
 
@@ -22,7 +22,7 @@ export class ImportCommand implements Command {
     this.onCompleteImport = this.onCompleteImport.bind(this);
 
     this.logger = new ConsoleLogger();
-    this.offerService = new DefaultOfferService(this.logger, OfferModel, UserModel);
+    this.offerService = new DefaultOfferService(this.logger, OfferModel, UserModel, CommentModel);
     this.userService = new DefaultUserService(this.logger, UserModel);
     this.databaseClient = new MongoDatabaseClient(this.logger);
   }
@@ -48,7 +48,6 @@ export class ImportCommand implements Command {
       userId: user.id,
       title: offer.title,
       description: offer.description,
-      postDate: offer.postDate,
       city: offer.city,
       image: offer.image,
       photos: offer.photos,

@@ -1,40 +1,28 @@
+@host = http://localhost:5000
+@token = eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Imtla3Npa0BtYWlsLnJ1IiwibmFtZSI6IlN0YXIiLCJpZCI6IjY1ZTMwMzI2ZWE0OWFkNmZhM2ZlZDUwNSIsImlhdCI6MTcwOTU2OTI5NiwiZXhwIjoxNzA5NzQyMDk2fQ.07N3Tnx7-I3fj_MSPueB-sgXeM9SIb5G4a1KR4CBLWY
+
 # Пользователи
 ## Создание нового пользователя
 
-POST http://localhost:5000/users/registration HTTP/1.1
+POST {{ host }}/users/registration HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "Star",
-  "email": "keks@mail.ru",
+  "name": "keksik",
+  "email": "keksik@mail.ru",
   "password": "123456",
-  "userType":"pro"
-}
-
-###
-
-## Создание нового пользователя неправильный тип файла
-
-POST http://localhost:5000/users/registration HTTP/1.1
-Content-Type: application/json
-
-{
-  "name": "Star",
-  "email": "keks1@mail.ru",
-  "password": "123456",
-  "avatar": "bad.svg",
-  "userType":"pro"
+  "userType":"обычный"
 }
 
 ###
 
 ## Вход в закрытую часть
 
-POST http://localhost:5000/users/login HTTP/1.1
+POST {{ host }}/users/login HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "keks1@mail.ru",
+  "email": "keksik@mail.ru",
   "password": "123456"
 }
 
@@ -42,21 +30,21 @@ Content-Type: application/json
 
 ## Проверка состояния пользователя
 
-GET http://localhost:5000/users/login HTTP/1.1
+GET {{ host }}/users/login HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Imtla3MxQG1haWwucnUiLCJuYW1lIjoiU3RhciIsImlkIjoiNjVkZGRmMTIwNWMzOTRmODFjMzc5NTQ4IiwiaWF0IjoxNzA5MjE0OTM5LCJleHAiOjE3MDkzODc3Mzl9._jVLD3HnGeGbL9dc3CIn2NabFCaj2hy8N1R6fmdODl8
-
+Authorization: Bearer {{ token }}
 
 ###
 
 ## Отправить изображение
 
-POST http://localhost:5000/users/65db3ef34a5c8c8b4e0df3fd/avatar HTTP/1.1
+POST {{ host }}/users/65e30326ea49ad6fa3fed505/avatar HTTP/1.1
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{ token }}
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="avatar"; filename="octopus-64x64.png"
-Content-Type: image/jpg
+Content-Disposition: form-data; name="avatar"; filename="avatar1.jpg"
+Content-Type: image/jpeg
 
 < D:/avatar1.jpg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--

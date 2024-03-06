@@ -14,6 +14,8 @@ export type RestSchema = {
   UPLOAD_DIRECTORY: string;
   JWT_SECRET: string;
   JWT_EXPIRED: string;
+  HOST: string;
+  STATIC_DIRECTORY_PATH: string;
 }
 
 export const configRestSchema = convict<RestSchema>({
@@ -77,4 +79,17 @@ export const configRestSchema = convict<RestSchema>({
     env: 'JWT_EXPIRED',
     default: null
   },
+  HOST: {
+    doc: 'Host where started service',
+    format: String,
+    env: 'HOST',
+    default: null
+  },
+  STATIC_DIRECTORY_PATH: {
+    doc: 'Path to directory with static resources',
+    format: String,
+    env: 'STATIC_DIRECTORY_PATH',
+    default: null
+  },
+
 });

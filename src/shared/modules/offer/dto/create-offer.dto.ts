@@ -11,7 +11,6 @@ import {
   MaxLength,
   Min,
   MinLength,
-  IsDateString,
   IsUrl
 } from 'class-validator';
 import { TypeOfHousing, City, Location } from '../../../types/index.js';
@@ -25,8 +24,6 @@ import {
 } from '../../../constants/index.js';
 import { Comfort } from '../../../types/comfort.enum.js';
 
-const POST_DATE_MESSAGE = 'postDate must be a valid ISO date';
-
 export class CreateOfferDto {
   @MinLength(TITLE_CONSTRAINT.MIN)
   @MaxLength(TITLE_CONSTRAINT.MAX)
@@ -35,9 +32,6 @@ export class CreateOfferDto {
   @MinLength(DESCRIPTION_CONSTRAINT.MIN)
   @MaxLength(DESCRIPTION_CONSTRAINT.MAX)
   public description!: string;
-
-  @IsDateString({}, {message : POST_DATE_MESSAGE})
-  public postDate!: Date;
 
   @IsEnum(City)
   public city!: City;

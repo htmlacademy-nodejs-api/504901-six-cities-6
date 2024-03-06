@@ -1,9 +1,9 @@
 import { DocumentType, types } from '@typegoose/typegoose';
-import { CreateUserDto, UserEntity, UserService } from '../index.js';
+import { CreateUserDto, UserEntity, UpdateUserDto, UserService } from '../index.js';
 import { inject, injectable } from 'inversify';
 import { Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
-import mongoose from 'mongoose';
+import { DEFAULT_AVATAR_FILE_NAME } from './../index.js';
 
 @injectable()
 export class DefaultUserService implements UserService {
@@ -13,23 +13,16 @@ export class DefaultUserService implements UserService {
   ) {}
 
   public async create(dto: CreateUserDto): Promise<DocumentType<UserEntity>> {
-    try {
-      const user = new UserEntity(dto);
+    const user = new UserEntity({ ...dto, avatar: DEFAULT_AVATAR_FILE_NAME });
 
-      const result = await this.userModel.create(user);
-      this.logger.info(`New user created: ${user.email}`);
+    const result = await this.userModel.create(user);
+    this.logger.info(`New user created: ${user.email}`);
 
-      return result;
-    } catch (error) {
-      if (error instanceof mongoose.Error.ValidationError && error.errors.userType) {
-        throw new Error('User type is required');
-      }
-      throw error;
-    }
+    return result;
   }
 
   public async findByEmail(email: string): Promise<DocumentType<UserEntity> | null> {
-    return this.userModel.findOne({email});
+    return this.userModel.findOne({ email }).exec();
   }
 
   public async findOrCreate(dto: CreateUserDto): Promise<DocumentType<UserEntity>> {
@@ -42,8 +35,14 @@ export class DefaultUserService implements UserService {
     return this.create(dto);
   }
 
-  public async findById(id: string): Promise<DocumentType<UserEntity> | null> {
-    return this.userModel.findById(id);
+  public async findById(userId: string): Promise<DocumentType<UserEntity> | null> {
+    return this.userModel.findById(userId).exec();
+  }
+
+  public async updateById(userId: string, dto: UpdateUserDto): Promise<DocumentType<UserEntity> | null> {
+    return this.userModel
+      .findByIdAndUpdate(userId, dto, { new: true })
+      .exec();
   }
 }
 

@@ -6,18 +6,19 @@ import { BaseController,
   ValidateObjectIdMiddleware,
   ValidateDtoMiddleware,
   DocumentExistsMiddleware,
-  PrivateRouteMiddleware
+  PrivateRouteMiddleware,
+  RequestBody
 } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
-import { Component } from '../../types/index.js';
+import { Component, City } from '../../types/index.js';
 import {
   CreateOfferRequest,
   OfferService,
   OfferRdo,
+  OfferPartRdo,
   UpdateOfferDto,
   CreateOfferDto,
   ParamOfferId,
-  ParamCity
 } from '../index.js';
 import { Request, Response } from 'express';
 import { fillDTO } from '../../helpers/index.js';
@@ -82,15 +83,20 @@ export class OfferController extends BaseController {
     });
 
     this.addRoute({
-      path: '/:city/',
+      path: '/:city/premium',
       method: HttpMethod.Get,
-      handler: this.findByCity
+      handler: this.getPremium
     });
 
     this.addRoute({
-      path: '/:city/premium',
-      method: HttpMethod.Get,
-      handler: this.findPremiumByCity
+      path: '/:offerId/favorite',
+      method: HttpMethod.Put,
+      handler: this.updateFavorite,
+      middlewares: [
+        new PrivateRouteMiddleware(),
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'offer', 'offerId'),
+      ],
     });
   }
 
@@ -100,9 +106,21 @@ export class OfferController extends BaseController {
     this.created(res, fillDTO(OfferRdo, offer));
   }
 
-  public async index({ query }: Request<unknown, unknown, unknown, RequestQuery>, res: Response): Promise<void> {
-    const { limit } = query;
-    const offers = await this.offerService.find(!isNaN(Number(limit)) ? Number(limit) : undefined);
+  public async index({ query, tokenPayload }: Request<unknown, unknown, unknown, RequestQuery>, res: Response): Promise<void> {
+    const { limit, city, favorite } = query;
+    if (query.city && !(query.city in City)) {
+      throw new HttpError(StatusCodes.BAD_REQUEST, 'Invalid city');
+    }
+    const count = limit === undefined ? undefined : Number(limit);
+    const town = city ?? undefined;
+    const isFavorite = favorite === undefined ? undefined : favorite === 'true';
+    const userId = tokenPayload?.id;
+
+    if (isFavorite && !userId) {
+      throw new HttpError(StatusCodes.UNAUTHORIZED, 'user UNAUTHORIZED');
+    }
+
+    const offers = await this.offerService.find(count, town);
     this.ok(res, fillDTO(OfferRdo, offers));
   }
 
@@ -112,34 +130,18 @@ export class OfferController extends BaseController {
     this.ok(res, fillDTO(OfferRdo, offer));
   }
 
-  public async update({ body, params }: Request<ParamOfferId, unknown, UpdateOfferDto>, res: Response): Promise<void> {
-    const offer = await this.offerService.updateById(String(params.offerId), body);
+  public async update({ body, params, tokenPayload }: Request<ParamOfferId, unknown, UpdateOfferDto>, res: Response): Promise<void> {
+    const offer = await this.offerService.updateById(String(params.offerId), body, tokenPayload);
     this.ok(res, fillDTO(OfferRdo, offer));
   }
 
-  public async delete({ params }: Request<ParamOfferId>, res: Response): Promise<void> {
+  public async delete({ params, tokenPayload}: Request<ParamOfferId>, res: Response): Promise<void> {
     const { offerId } = params;
-    const offer = await this.offerService.deleteById(offerId);
+    const offer = await this.offerService.deleteById(offerId, tokenPayload);
     this.noContent(res, offer);
   }
 
-  public async findByCity({ params, query }: Request<ParamCity, unknown, unknown, RequestQuery>, res: Response): Promise<void> {
-    const { city } = params;
-    const { limit } = query;
-    const existsOffer = await this.offerService.findByCity(city, !isNaN(Number(limit)) ? Number(limit) : undefined);
-
-    if (!existsOffer) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        `Offer with the specified ID:«${params.city}» not found.`,
-        'OfferController',
-      );
-    }
-
-    this.ok(res, fillDTO(OfferRdo, existsOffer));
-  }
-
-  public async findPremiumByCity({ params }: Request, res: Response): Promise<void> {
+  public async getPremium({ params }: Request, res: Response): Promise<void> {
     const existsOffer = await this.offerService.findPremiumByCity(params.city);
 
     if (!existsOffer) {
@@ -150,6 +152,17 @@ export class OfferController extends BaseController {
       );
     }
 
-    this.ok(res, fillDTO(OfferRdo, existsOffer));
+    this.ok(res, fillDTO(OfferPartRdo, existsOffer));
+  }
+
+  public async updateFavorite(
+    { params, tokenPayload, body }: Request<ParamOfferId, RequestBody, { isFavorite: string}>, res: Response): Promise<void> {
+    const { offerId } = params;
+    const userId = tokenPayload.id;
+    const isFavorite = body.isFavorite === true.toString();
+
+    const offer = await this.offerService.toggleFavorites(userId, offerId, isFavorite);
+
+    this.ok(res, { isFavorite: offer });
   }
 }

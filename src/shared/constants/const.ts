@@ -93,3 +93,5 @@ export enum OFFER_LIMITS {
   COMMENTS_COUNT = 50,
   PREMIUM_COUNT = 3
 }
+
+export const DEFAULT_AVATAR_FILE_NAME = 'default-avatar.png';
