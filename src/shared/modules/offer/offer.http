@@ -93,13 +93,13 @@ Content-Type: application/json
 Authorization: Bearer {{ token }}
 
 {
-  "isFavorite": "false"
+  "isFavorite": "true"
 }
 
 ###
 
 ## Получить избранные предложения пользователя
 
-GET  {{ host }}/offers/favorites HTTP/1.1
+GET  {{ host }}/offers/?favorite='true' HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{ token }}

@@ -25,6 +25,7 @@ export * from './offer/type/param-offerid.type.js';
 export * from './offer/dto/create-offer.dto.js';
 export * from './offer/dto/update-offer.dto.js';
 export * from './offer/rdo/offer.rdo.js';
+export * from './offer/rdo/offer-part.rdo.js';
 
 export * from './comment/dto/create-comment.dto.js';
 export * from './comment/comment.container.js';

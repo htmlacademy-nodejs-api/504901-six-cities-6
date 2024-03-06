@@ -42,9 +42,7 @@ export class UserEntity extends defaultClasses.TimeStamps implements User {
 
   @prop({
     ref: () => OfferEntity,
-    _id: false,
     default: [],
-    type: () => [OfferEntity]
   })
   public favorites!: Ref<OfferEntity>[];
 

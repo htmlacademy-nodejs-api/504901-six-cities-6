@@ -15,8 +15,6 @@ tags:
     description: Управление предложениями об аренде.
   - name: comments
     description: Добавление комментариев к определённому предложению по аренде.
-  - name: favorites
-    description: Управление списком избранных предложений пользователя.
 
 paths:
   users/registration:
@@ -62,6 +60,7 @@ paths:
                   type: string
                 password:
                   type: string
+        required: true
 
       responses:
         "200":
@@ -73,17 +72,22 @@ paths:
                 properties:
                   token:
                     type: string
-        "400":
+        "401":
           description: Неверный логин или пароль.
-        "500":
-          description: Внутренняя ошибка сервера.
-        required: true
- 
+
     get:
       tags:
         - users
       summary: Проверка текущего статуса пользователя
-      description: Возвращает информацию авторизован пользователь или нет по токену сессии
+      description: Если клиент авторизован, сервис возвращает соответствующий код состояния и информацию о пользователе.
+
+      parameters:
+        - name: token
+          in: header
+          description: JWT token
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -103,10 +107,7 @@ paths:
                   typeUser:
                     $ref: '#/components/schemas/userType'
         "401":
-          description: Пользователь не авторизован или сессия истекла
-
-      security:
-        - bearerToken: []
+          description:  Неверный токен или срок действия токена истек
 
   /offers:
     get:
@@ -114,40 +115,56 @@ paths:
         - offers
       summary: Возвращает список предложений по аренде недвижимости.
       description: По умолчанию сервис возвращает не больше 60 предложений по аренде. Клиент может запросить больше предложений, указав нужное количество в параметре запроса
+        Сервис всегда возвращает отсортированный список предложений по дате публикации (по убыванию).
+        Предложение не содержит список комментариев. Только информацию об их количестве. Для запроса комментариев к определённому предложению сервис предоставляет отдельный ресурс.
+
       parameters:
-        - name: city
-          in: path
-          description: Название города для фильтрации предложений
-          required: false
+        - name: token
+          in: header
+          description: 'JWT token'
           schema:
             type: string
         - name: limit
           in: query
-          description: Количество возвращаемых предложений
-          required: false
+          description: limit
           schema:
-            type: integer
-            default: 60
+            type: number
+        - name: city
+          in: query
+          description: city
+          schema:
+            type: string
+        - name: favorite
+          in: query
+          description: favorite
+          schema:
+            type: boolean
 
       responses:
         "200":
-          description: Список предложений об аренде
+          description: Список предложений по аренде
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/offer'
-        "400":
-          description: Неверные параметры запроса.
-        "500":
-          description: Внутренняя ошибка сервера.
+        "401":
+          description:  Неверный токен или срок действия токена истек
 
     post:
       tags:
         - offers
       summary: Создание предложения по аренде
       description: Создавать предложения могут только авторизованные клиенты
+
+      parameters:
+        - name: token
+          in: header
+          description: 'JWT token'
+          schema:
+            type: string
+          required: true
 
       requestBody:
         description: Информация для создания предложения по аренде.
@@ -164,12 +181,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/offer'
-        "400":
-           description: Неверный запрос или данные.
         "401":
-          description: Создавать предложения по аренде могут только авторизованные пользователи.
-        "500":
-          description: Внутренняя ошибка сервера.
+          description:  Неверный токен или срок действия токена истек
 
   /offers/{offerId}:
     get:
@@ -178,6 +191,11 @@ paths:
       summary: Предоставляет детальную информации о конкретном предложении об аренде недвижимости.
       description: Детальную информацию по предложению могут запрашивать авторизованные и анонимные клиенты.
       parameters:
+        - name: token
+          in: header
+          description: 'JWT token'
+          schema:
+            type: string
         - name: offerId
           in: path
           required: true
@@ -196,8 +214,8 @@ paths:
           description: Неверный запрос или данные.
         "404":
           description: Предложение не найдено.
-        "500":
-          description: Внутренняя ошибка сервера.
+        "401":
+          description:  Неверный токен или срок действия токена истек
 
     patch:
       tags:
@@ -205,6 +223,12 @@ paths:
       summary: Редактирование предложения по аренде.
       description: Редактировать предложения по аренде могут только авторизованные клиенты.
       parameters:
+        - name: token
+          in: header
+          description: JWT token
+          schema:
+            type: string
+          required: true
         - name: offerId
           in: path
           description: ID предложения
@@ -228,17 +252,12 @@ paths:
                 $ref: '#/components/schemas/offer'
         "400":
           description: Неверный запрос или данные.
-        "401":
-          description: Требуется аутентификация.
         "403":
           description: Вы не можете отредактировать чужое предложение по аренде.
         "404":
           description: Предложение не найдено.
-        "500":
-          description: Внутренняя ошибка сервера.
-
-      security:
-        - bearerToken: []
+        "401":
+          description:  Неверный токен или срок действия токена истек
 
     delete:
       tags:
@@ -246,6 +265,12 @@ paths:
       summary: Удаление предложения по аренде.
       description: Удалять предложения могут только авторизованные клиенты.
       parameters:
+        - name: token
+          in: header
+          description: 'JWT token'
+          schema:
+            type: string
+          required: true
         - name: offerId
           in: path
           required: true
@@ -258,17 +283,92 @@ paths:
           description: Предложение успешно удалено.
         "400":
           description: Неверный запрос или данные.
-        "401":
-          description: Требуется аутентификация.
         "403":
           description: Нельзя удалить предложение другого пользователя.
         "404":
           description: Предложение не найдено.
-        "500":
-          description: Внутренняя ошибка сервера.
+        "401":
+          description:  Неверный токен или срок действия токена истек
 
-      security:
-        - bearerToken: []
+  /offers/{offer_id}/favorite/:
+    put:
+      tags:
+        - offers
+      summary: Добавление и удаление предложения в/из избранного
+      description:
+        Сервис предоставляет ресурс для добавления и удаления любого предложения в/из списка избранных предложений.
+        Ресурс доступен только авторизованным клиентам.
+      parameters:
+        - name: token
+          in: header
+          description: 'JWT token'
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        description: Добавление и удаление избраных предложений пользователя.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isFavorite:
+                  type: boolean
+                  example: false
+        required: true
+
+      responses:
+        '200':
+          description: Добавление или удаление избранных предложение успешно.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isFavorite:
+                    type: boolean
+                    example: false
+        '400':
+          description: Неверный запрос или данные.
+        '401':
+          description:  Неверный токен или срок действия токена истек
+        '404':
+          description: Предложение не найдено.
+
+  /offers/{city}/premium:
+    get:
+      tags:
+        - offers
+      summary: Предоставляет премиальные предложения для города.
+      description: Сервис предоставляет ресурс для получения списка премиальных предложений для определённого города.
+        Премиальное предложение — предложение с флагом «Premium».
+        Сервис возвращает не больше 3 предложений с флагом «Premium».
+        Список возвращаемых предложений отсортирован по дате публикации (по убыванию).
+        Ресурс доступен авторизованным и анонимным клиентам.
+
+      parameters:
+        - name: city
+          in: path
+          required: true
+          description: Город
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: limit
+          schema:
+            type: number
+
+      responses:
+        "200":
+          description: Информация получена.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+        "400":
+          description: Неверный запрос или данные.
 
   /comments/{offerId}:
     get:
@@ -283,6 +383,11 @@ paths:
           description: ID предложения
           schema:
             type: string
+        - name: limit
+          in: query
+          description: limit
+          schema:
+            type: number
 
       responses:
         "200":
@@ -293,16 +398,23 @@ paths:
                 type: array
                 items:
                 $ref: '#/components/schemas/comment'
-        "404":
+        "400":
+          description: Неверный запрос или данные.
+        '404':
           description: Предложение не найдено.
-        '500':
-          description: Внутренняя ошибка сервера.
+
     post:
       tags:
         - comments
       summary: Добавление нового комментария к предложению об аренде.
       description: Добавлять комментарии могут только авторизованные клиенты.
       parameters:
+        - name: token
+          in: header
+          description: 'JWT token'
+          required: true
+          schema:
+            type: string
         - name: offerId
           in: path
           required: true
@@ -326,126 +438,10 @@ paths:
                 $ref: '#/components/schemas/comment'
         "400":
           description: Неверный запрос или данные.
-        "401":
-          description: Требуется аутентификация.
         "404":
           description: Предложение не найдено.
-        "500":
-          description: Внутренняя ошибка сервера.
-
-      security:
-        - bearerToken: []
-
-  /offers/city/premium:
-    get:
-      tags:
-        - offers
-      summary: Получение списка премиальных предложений для определённого города.
-      description: Сервис возвращает не больше 3 предложений с флагом «Premium». Список возвращаемых предложений отсортирован по дате публикации (по убыванию). Доступно авторизованным и анонимным клиентам.
-      parameters:
-          - name: city
-            in: query
-            required: true
-            description: Название города для фильтрации предложений
-            schema:
-              type: string
-
-      responses:
-        "200":
-          description: Список предложений с флагом «Premium».
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/premium'
-        "400":
-          description: Неверный запрос или данные.
-        "404":
-            description: Предложение не найдено.
-        "500":
-            description: Внутренняя ошибка сервера.
-
-  /favorites:
-    get:
-      tags:
-        - favorites
-      summary: Получение списка всех предложений, добавленных пользователем в избранное.
-      description: Доступено только авторизованным клиентам.
-      responses:
-        "200":
-          description: Список избранных предложений
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/premium'
         "401":
-          description: Требуется аутентификация.
-        "500":
-          description: Внутренняя ошибка сервера.
-
-      security:
-        - bearerToken: []
-
-  /favorites/{offerId}:
-    post:
-      tags:
-        - favorites
-      summary: Добавление предложения в список избранное пользователя.
-      description: Доступно только авторизованным клиентам.
-      parameters:
-        - name: offerId
-          in: path
-          required: true
-          description: ID предложения
-          schema:
-            type: string
-
-      responses:
-        "201":
-          description: Предложение добавлено в избранное
-        "400":
-          description: Неверный запрос или данные.
-        "401":
-          description: Требуется аутентификация.
-        "404":
-          description: Предложение не найдено.
-        "500":
-          description: Внутренняя ошибка сервера.
-
-      security:
-        - bearerToken: []
-
-    delete:
-      tags:
-        - favorites
-      summary: Удаление предложения из списка избранных пользователя.
-      description: Доступно только авторизованным клиентам.
-      operationId: removeOfferFromFavorites
-      parameters:
-        - name: offerId
-          in: path
-          required: true
-          description: ID предложения
-          schema:
-            type: string
-
-      responses:
-        "204":
-          description: Предложение удалено из избранных
-        "400":
-          description: Неверный запрос или данные.
-        "401":
-          description: Требуется аутентификация.
-        "404":
-          description: Предложение не найдено.
-        "500":
-          description: Внутренняя ошибка сервера.
-
-      security:
-        - bearerToken: []
+          description:  Неверный токен или срок действия токена истек
 
 components:
   schemas:
@@ -581,8 +577,3 @@ components:
         user:
           $ref: '#/components/schemas/user'
 
-  securitySchemes:
-    bearerToken:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT

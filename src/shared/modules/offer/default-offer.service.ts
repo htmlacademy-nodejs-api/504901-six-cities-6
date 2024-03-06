@@ -74,6 +74,8 @@ export class DefaultOfferService implements OfferService {
   public async find(
     count?: number,
     town?: string,
+    favorite?: boolean,
+    userId?: string
   ): Promise<DocumentType<OfferEntity>[]> {
     const limit = count ?? OFFER_LIMITS.OFFER_COUNT;
 
@@ -81,6 +83,29 @@ export class DefaultOfferService implements OfferService {
 
     const aggregationPipeline: PipelineStage[] = [
       { $match: matchStage },
+    ];
+
+    if (favorite && userId) {
+      const user = await this.userModel.findById(userId);
+
+      if (user && user.favorites) {
+        aggregationPipeline.unshift({
+          $match: {
+            _id: {
+              $in: user.favorites,
+            },
+          },
+        });
+
+        aggregationPipeline.push({
+          $set: {
+            isFavorite: true,
+          },
+        });
+      }
+    }
+
+    aggregationPipeline.push(
       { $sort: { createdAt: SortType.Down }},
       { $limit: limit },
       {
@@ -108,7 +133,7 @@ export class DefaultOfferService implements OfferService {
           'user.id': '$user._id',
         },
       },
-    ];
+    );
 
     return this.offerModel.aggregate(aggregationPipeline).exec();
   }
@@ -139,35 +164,15 @@ export class DefaultOfferService implements OfferService {
   public async findPremiumByCity(city: string, limit: number = OFFER_LIMITS.PREMIUM_COUNT): Promise<DocumentType<OfferEntity>[]> {
     if (city in City) {
       return this.offerModel
-        .find({city}, {isPremium: true})
-        .sort({ createdAt: SortType.Down })
-        .limit(limit)
-        .exec();
+        .aggregate([
+          { $match: {city}},
+          { $match :{isPremium: true} },
+          { $sort: { createdAt: SortType.Down }},
+          { $limit: limit },
+        ]).exec();
     } else {
       throw new Error(`${city} is wrong`);
     }
-  }
-
-  public async getFavoriteOffersByUser(userId: string): Promise<DocumentType<OfferEntity>[]> {
-
-    const user = await this.userModel.findById(userId);
-    const aggregationPipeline: PipelineStage[] = [];
-    if (user && user.favorites) {
-      aggregationPipeline.unshift({
-        $match: {
-          _id: { $in: user.favorites}
-        }
-      });
-      aggregationPipeline.push({
-        $set: { isFavorite: true }
-      });
-      aggregationPipeline.push(
-        {
-          $project: { title: 1, postDate: 1, city: 1, image: 1, isPremium: 1, rating: 1, typeOfHousing: 1, price: 1 }
-        }
-      );
-    }
-    return this.offerModel.aggregate(aggregationPipeline).exec();
   }
 
   public async toggleFavorites(userId: string, offerId: string, isFavorite: boolean): Promise<boolean> {
@@ -185,8 +190,10 @@ export class DefaultOfferService implements OfferService {
     }
     const offerIdObectId = new Types.ObjectId(offerId);
     if (isFavorite) {
-      user.favorites.push(offerIdObectId);
-      await user.save();
+      if (!user.favorites.includes(offerIdObectId)) {
+        user.favorites.push(offerIdObectId);
+        await user.save();
+      }
       return true;
     } else {
       const index = user.favorites.indexOf(offerIdObectId);

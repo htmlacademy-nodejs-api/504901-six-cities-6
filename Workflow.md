@@ -101,6 +101,10 @@ DB_PORT=value - Порт пользователя в базе данных (Mong
 DB_NAME=value - Название базы данных (MongoDB)
 
 UPLOAD_DIRECTORY=value - Каталог для загрузки файлов
+JWT_SECRET=value - Подпись для токена JWT
+JWT_EXPIRED=value - Срок жизни JWT токена
+HOST=value - Хост, на котором запущена служба
+STATIC_DIRECTORY_PATH=value - Путь к каталогу со статическими ресурсами
 ```
 
 ### Остальное

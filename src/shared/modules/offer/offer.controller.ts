@@ -15,6 +15,7 @@ import {
   CreateOfferRequest,
   OfferService,
   OfferRdo,
+  OfferPartRdo,
   UpdateOfferDto,
   CreateOfferDto,
   ParamOfferId,
@@ -97,15 +98,6 @@ export class OfferController extends BaseController {
         new DocumentExistsMiddleware(this.offerService, 'offer', 'offerId'),
       ],
     });
-
-    this.addRoute({
-      path: '/favorites',
-      method: HttpMethod.Get,
-      handler: this.getFavorites,
-      middlewares: [
-        new PrivateRouteMiddleware(),
-      ],
-    });
   }
 
   public async create({ body, tokenPayload }: CreateOfferRequest, res: Response): Promise<void> {
@@ -114,13 +106,20 @@ export class OfferController extends BaseController {
     this.created(res, fillDTO(OfferRdo, offer));
   }
 
-  public async index({ query }: Request<unknown, unknown, unknown, RequestQuery>, res: Response): Promise<void> {
-    const { limit, city } = query;
+  public async index({ query, tokenPayload }: Request<unknown, unknown, unknown, RequestQuery>, res: Response): Promise<void> {
+    const { limit, city, favorite } = query;
     if (query.city && !(query.city in City)) {
       throw new HttpError(StatusCodes.BAD_REQUEST, 'Invalid city');
     }
     const count = limit === undefined ? undefined : Number(limit);
     const town = city ?? undefined;
+    const isFavorite = favorite === undefined ? undefined : favorite === 'true';
+    const userId = tokenPayload?.id;
+
+    if (isFavorite && !userId) {
+      throw new HttpError(StatusCodes.UNAUTHORIZED, 'user UNAUTHORIZED');
+    }
+
     const offers = await this.offerService.find(count, town);
     this.ok(res, fillDTO(OfferRdo, offers));
   }
@@ -153,7 +152,7 @@ export class OfferController extends BaseController {
       );
     }
 
-    this.ok(res, fillDTO(OfferRdo, existsOffer));
+    this.ok(res, fillDTO(OfferPartRdo, existsOffer));
   }
 
   public async updateFavorite(
@@ -165,10 +164,5 @@ export class OfferController extends BaseController {
     const offer = await this.offerService.toggleFavorites(userId, offerId, isFavorite);
 
     this.ok(res, { isFavorite: offer });
-  }
-
-  public async getFavorites({ tokenPayload }: Request, res: Response): Promise<void> {
-    const offers = await this.offerService.getFavoriteOffersByUser(tokenPayload.id);
-    this.ok(res, fillDTO(OfferRdo, offers));
   }
 }
