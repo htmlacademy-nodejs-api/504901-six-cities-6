@@ -6,13 +6,12 @@ import { TokenPayload } from '../../auth/index.js';
 
 export interface OfferService extends DocumentExists {
   create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>>;
-  findById(offerId: string): Promise<DocumentType<OfferEntity> | null>;
+  findById(offerId: string, userId?: string): Promise<DocumentType<OfferEntity> | null>;
   deleteById(offerId: string, tokenPayload: TokenPayload): Promise<DocumentType<OfferEntity> | null>;
   updateById(offerId: string, dto: UpdateOfferDto, tokenPayload: TokenPayload): Promise<DocumentType<OfferEntity> | null>;
-  find(count?: number, city?: string): Promise<DocumentType<OfferEntity>[]>;
+  find(count?: number, city?: string, userId?: string): Promise<DocumentType<OfferEntity>[]>;
   changeRating(offerId: string, newRating: number): Promise<DocumentType<OfferEntity> | null>;
   findFavorites(userId: string): Promise<DocumentType<OfferEntity>[]>
   exists(documentId: string): Promise<boolean>;
-  findPremiumByCity(city: string, limit?: number): Promise<DocumentType<OfferEntity>[]>;
-  toggleFavorites(userId: string, offerId: string, isFavorite: boolean): Promise<boolean>;
+  findPremiumByCity(city: string, userId?: string): Promise<DocumentType<OfferEntity>[]>;
 }

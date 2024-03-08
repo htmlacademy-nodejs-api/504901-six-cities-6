@@ -6,6 +6,9 @@ import {
 
 export class OfferPartRdo {
   @Expose()
+  public id!: string;
+
+  @Expose()
   public price!: number;
 
   @Expose()
@@ -15,10 +18,10 @@ export class OfferPartRdo {
   public typeOfHousing!: TypeOfHousing;
 
   @Expose()
-  public isFavorites!: boolean;
+  public isFavorite!: boolean;
 
   @Expose()
-  public postDate!: string;
+  public createdAt!: string;
 
   @Expose()
   public city!: City;

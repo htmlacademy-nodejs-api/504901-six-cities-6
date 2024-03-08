@@ -4,7 +4,8 @@ import {
   IsUrl,
   Length,
   Matches,
-  IsOptional
+  IsOptional,
+  IsArray
 } from 'class-validator';
 import { UserType } from '../../../types/index.js';
 
@@ -34,4 +35,8 @@ export class UpdateUserDto {
   @IsOptional()
   @Length(PASSWORD_CONSTRAINT.MIN, PASSWORD_CONSTRAINT.MAX)
   public password?: string;
+
+  @IsOptional()
+  @IsArray()
+  public favorites?: string[];
 }

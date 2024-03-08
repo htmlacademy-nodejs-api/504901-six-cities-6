@@ -1,12 +1,13 @@
 @host = http://localhost:5000
-@token = eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Imtla3Npa0BtYWlsLnJ1IiwibmFtZSI6IlN0YXIiLCJpZCI6IjY1ZTMwMzI2ZWE0OWFkNmZhM2ZlZDUwNSIsImlhdCI6MTcwOTc0NzU0OSwiZXhwIjoxNzA5OTIwMzQ5fQ.cHXqswEf8ga5kzGQEOzW4f7oBUXw4JiYnjAEc_PO1U8
+@token = eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Imtla3Npa0BtYWlsLnJ1IiwibmFtZSI6IlN0YXIiLCJpZCI6IjY1ZTMwMzI2ZWE0OWFkNmZhM2ZlZDUwNSIsImlhdCI6MTcwOTkwNDQ0MiwiZXhwIjoxNzEwMDc3MjQyfQ.F6vdwYXvEp9Vx0F9gd9yhIUDjBEg7UFyJAbO7M9YQ6k
 
 # Предложения по аренде
 
 ## Список предложений по аренде
 
-GET {{ host }}/offers/?limit=2 HTTP/1.1
+GET {{ host }}/offers/ HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer {{ token }}
 
 ###
 
@@ -14,7 +15,7 @@ Content-Type: application/json
 
 GET {{ host }}/offers/?city=Paris HTTP/1.1
 Content-Type: application/json
-
+Authorization: Bearer {{ token }}
 ###
 
 ## Создание нового предложения
@@ -55,8 +56,9 @@ Authorization: Bearer {{ token }}
 
 ## Детальная информация по предложению
 
-GET  {{ host }}/offers/65dccf7ea1c487e5f9e7847c/ HTTP/1.1
+GET  {{ host }}/offers/65d83da4d91892a628b5ccb7/ HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer {{ token }}
 
 ###
 
@@ -82,27 +84,19 @@ Authorization: Bearer {{ token }}
 
 ##Премиум по городу
 GET {{ host }}/offers/Paris/premium HTTP/1.1
-
+Authorization: Bearer {{ token }}
 
 ###
 
 ## Добавление и удаление предложения в/из избранного проверить
 
-PUT  {{ host }}/offers/65d83da4d91892a628b5ccb7/favorite/ HTTP/1.1
+PUT  {{ host }}/offers/65eacad8ee31b1805d65436d/favorite/ HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{ token }}
 
 {
-  "isFavorite": "false"
+  "isFavorite": true
 }
-
-###
-
-## Получить избранные предложения пользователя
-
-GET  {{ host }}/offers/?favorite='true' HTTP/1.1
-Content-Type: application/json
-Authorization: Bearer {{ token }}
 
 ###
 

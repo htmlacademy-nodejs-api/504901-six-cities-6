@@ -17,7 +17,7 @@ export class OfferRdo {
   public description!: string;
 
   @Expose()
-  public postDate!: string;
+  public createdAt!: string;
 
   @Expose()
   public city!: City;
@@ -32,7 +32,7 @@ export class OfferRdo {
   public isPremium!: boolean;
 
   @Expose()
-  public isFavorites!: boolean;
+  public isFavorite!: boolean;
 
   @Expose()
   public rating!: number;
@@ -55,9 +55,9 @@ export class OfferRdo {
   @Expose()
   public commentCount!: number;
 
-  @Expose({ name: 'userId'})
+  @Expose({ name: 'author'})
   @Type(() => UserRdo)
-  public user!: UserRdo;
+  public author!: UserRdo;
 
   @Expose()
   public location!: Location;
