@@ -12,11 +12,14 @@
     "start": "npm run build && node ./dist/main.rest.js",
     "start:dev": "nodemon",
     "build": "npm run clean && npm run compile",
+    "cli": "npm run ts ./src/main.cli.ts",
     "lint": "eslint src/ --ext .ts",
     "compile": "tsc -p tsconfig.json",
     "clean": "rimraf dist",
     "ts": "node --no-warnings=ExperimentalWarning --loader ts-node/esm",
-    "mock:server": "json-server ./mocks/mock-server-data.json --port 3123"
+    "mock:server": "json-server ./mocks/mock-server-data.json --port 3123",
+    "mock:data": "npm run cli -- -- --generate 5 ./mocks/test-data.tsv http://localhost:3123/api",
+    "mock:write": "npm run cli -- -- --import ./mocks/test-data.tsv"
   },
   "devDependencies": {
     "@types/convict": "^6.1.6",

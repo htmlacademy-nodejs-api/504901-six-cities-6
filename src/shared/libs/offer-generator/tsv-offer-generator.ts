@@ -6,14 +6,9 @@ import {
   PRICE_CONSTRAINT,
   ROOMS_CONSTRAINT,
   GUESTS_CONSTRAINT,
-  PHOTOS_COUNT
-} from '../../constants/index.js';
-import { } from '../../constants/index.js';
-
-enum WEEK_DAY {
-  FIRST = 1,
-  LAST = 7
-}
+  PHOTOS_COUNT,
+  WEEK_DAY
+} from './index.js';
 
 export class TSVOfferGenerator implements OfferGenerator {
   constructor(private readonly mockData: MockServerData) {}

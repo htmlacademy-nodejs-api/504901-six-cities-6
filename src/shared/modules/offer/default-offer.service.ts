@@ -1,20 +1,21 @@
 import { inject, injectable } from 'inversify';
 import { Component, SortType, City } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
-import { DocumentType, types } from '@typegoose/typegoose';
+import { DocumentType, types, mongoose } from '@typegoose/typegoose';
 import {
   OfferEntity,
   CreateOfferDto,
   OfferService,
   UpdateOfferDto,
-  UserEntity,
   CommentEntity,
+  UserEntity
 } from '../index.js';
 import { OFFER_LIMITS, RATING_PRECISION } from '../../constants/index.js';
-import { PipelineStage, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
 import { HttpError } from '../../libs/rest/index.js';
 import { TokenPayload } from '../auth/index.js';
+import { getPipeline } from './offer.aggregation.js';
 
 @injectable()
 export class DefaultOfferService implements OfferService {
@@ -32,11 +33,24 @@ export class DefaultOfferService implements OfferService {
     return offer;
   }
 
-  public async findById(offerId: string): Promise<DocumentType<OfferEntity> | null> {
-    return this.offerModel
-      .findById(offerId)
-      .populate(['userId'])
-      .exec();
+  public async findById(offerId: string, userId?: string): Promise<DocumentType<OfferEntity> | null> {
+    return this.offerModel.aggregate([
+      {
+        $match: {
+          $expr: {
+            $eq: [{ $toObjectId: '$_id' }, { $toObjectId: offerId }]
+          }
+        }
+      },
+      ...getPipeline(userId),
+    ])
+      .exec()
+      .then((result) => {
+        if (result.length === 0) {
+          return null;
+        }
+        return result[0];
+      });
   }
 
   public async deleteById(offerId: string, tokenPayload: TokenPayload): Promise<DocumentType<OfferEntity> | null> {
@@ -74,68 +88,21 @@ export class DefaultOfferService implements OfferService {
   public async find(
     count?: number,
     town?: string,
-    favorite?: boolean,
     userId?: string
   ): Promise<DocumentType<OfferEntity>[]> {
     const limit = count ?? OFFER_LIMITS.OFFER_COUNT;
 
     const matchStage = town ? { city: town } : {};
 
-    const aggregationPipeline: PipelineStage[] = [
-      { $match: matchStage },
-    ];
+    return this.offerModel
+      .aggregate([
+        { $match: matchStage },
+        ...getPipeline(userId),
 
-    if (favorite && userId) {
-      const user = await this.userModel.findById(userId);
+        { $limit: limit },
+        { $sort: { createdAt: SortType.Down }},
 
-      if (user && user.favorites) {
-        aggregationPipeline.unshift({
-          $match: {
-            _id: {
-              $in: user.favorites,
-            },
-          },
-        });
-
-        aggregationPipeline.push({
-          $set: {
-            isFavorite: true,
-          },
-        });
-      }
-    }
-
-    aggregationPipeline.push(
-      { $sort: { createdAt: SortType.Down }},
-      { $limit: limit },
-      {
-        $set: {
-          publicationDate: '$createdAt',
-          id: '$_id',
-        },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userId',
-          foreignField: '_id',
-          as: 'user',
-        },
-      },
-      { $unwind: '$user', },
-      {
-        $addFields: {
-          userId: { $toString: '$user._id'},
-        }
-      },
-      {
-        $set: {
-          'user.id': '$user._id',
-        },
-      },
-    );
-
-    return this.offerModel.aggregate(aggregationPipeline).exec();
+      ]).exec();
   }
 
   public async changeRating(offerId: string, newRating: number): Promise<DocumentType<OfferEntity> | null> {
@@ -161,69 +128,79 @@ export class DefaultOfferService implements OfferService {
     return updatedOffer;
   }
 
-  public async findPremiumByCity(city: string, limit: number = OFFER_LIMITS.PREMIUM_COUNT): Promise<DocumentType<OfferEntity>[]> {
+  public async findPremiumByCity(city: string, userId?: string): Promise<DocumentType<OfferEntity>[]> {
     if (city in City) {
       return this.offerModel
         .aggregate([
           { $match: {city}},
-          { $match :{isPremium: true} },
+          { $match :{isPremium: true}},
+          ...getPipeline(userId),
+          { $limit: OFFER_LIMITS.PREMIUM_COUNT },
           { $sort: { createdAt: SortType.Down }},
-          { $limit: limit },
         ]).exec();
     } else {
       throw new Error(`${city} is wrong`);
     }
   }
 
-  public async toggleFavorites(userId: string, offerId: string, isFavorite: boolean): Promise<boolean> {
-
-    const user = await this.userModel.findById(userId).exec();
-
-    if (!user) {
-      throw new HttpError(StatusCodes.NOT_FOUND, `User with id ${userId} not found.`, 'DefaultOfferService');
-    }
-
-    const offer = await this.offerModel.findById(offerId).exec();
-
-    if (!offer) {
-      throw new HttpError(StatusCodes.NOT_FOUND, `Offer with id ${offerId} not found.`, 'DefaultOfferService');
-    }
-    const offerIdObectId = new Types.ObjectId(offerId);
-    if (isFavorite) {
-      if (!user.favorites.includes(offerIdObectId)) {
-        user.favorites.push(offerIdObectId);
-        await user.save();
-      }
-      return true;
-    } else {
-      const index = user.favorites.indexOf(offerIdObectId);
-      if (index >= 0) {
-        user.favorites.splice(index, 1);
-      }
-      await user.save();
-      return false;
-    }
-  }
-
   public async findFavorites(userId: string): Promise<DocumentType<OfferEntity>[]> {
-    return await this.offerModel.aggregate<DocumentType<OfferEntity>>([
+    return this.userModel.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(userId) }
+      },
+      {
+        $project: {
+          _id: 0,
+          favoriteOffers: {
+            $map: {
+              input: '$favorites',
+              as: 'fav',
+              in: {
+                $toObjectId: '$$fav'
+              }
+            }
+          }
+        }
+      },
       {
         $lookup: {
-          from: 'users',
-          let: { offerId: '$_id' },
-          pipeline: [
-            { $match: { $expr: { $eq: [{ $convert: { input: '$_id', to: 'string' } }, userId] } } },
-            { $match: { $expr: { $in: [{ $convert: { input: '$$offerId', to: 'string' } }, '$favourites'] } } },
-          ],
-          as: 'favourites'
+          from: 'offers',
+          localField: 'favoriteOffers',
+          foreignField: '_id',
+          as: 'favoriteOffers'
         }
       },
       {
-        $addFields: {
-          isFavourite: userId ? { $toBool: { $size: '$favourites'} } : false
+        $unwind: {
+          path: '$favoriteOffers'
         }
       },
-      { $sort: { createdAt: SortType.Down }},
+      {
+        $replaceRoot: { newRoot: '$favoriteOffers' }
+      },
+      { $addFields: {
+        isFavorite: true
+      }},
+      { $project: {
+        _id: 0,
+        id: { $toString: '$_id' },
+        city: 1,
+        rating: 1,
+        isFavorite: 1,
+        commentCount: 1,
+        image: 1,
+        createdAt: 1,
+        isPremium: 1,
+        price: 1,
+        title: 1,
+        description: 1,
+        location: 1,
+        comforts: 1,
+        typeOfHousing: 1,
+        roomsCount: 1,
+        guestsCount: 1,
+      }}
     ]).exec();
   }
+
 }

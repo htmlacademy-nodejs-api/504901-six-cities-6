@@ -57,7 +57,7 @@ export class UpdateOfferDto {
   public isPremium?: boolean;
 
   @IsOptional()
-  public isFavorites?: boolean;
+  public isFavorite?: boolean;
 
   @IsOptional()
   public rating?: number;

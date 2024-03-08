@@ -9,7 +9,7 @@ import { ConsoleLogger } from '../../shared/libs/logger/console.logger.js';
 import { DefaultUserService, UserModel, CommentModel } from '../../shared/modules/index.js';
 import { DEFAULT_USER_PASSWORD } from './command.constant.js';
 import { Offer, ConfigSchema } from '../../shared/types/index.js';
-import { Config } from '../../shared/libs/config/index.js';
+import { Config, RestConfig } from '../../shared/libs/config/index.js';
 
 export class ImportCommand implements Command {
   private userService: UserService;
@@ -24,9 +24,11 @@ export class ImportCommand implements Command {
     this.onCompleteImport = this.onCompleteImport.bind(this);
 
     this.logger = new ConsoleLogger();
+    this.config = new RestConfig(this.logger);
     this.offerService = new DefaultOfferService(this.logger, OfferModel, UserModel, CommentModel);
     this.userService = new DefaultUserService(this.logger, UserModel);
     this.databaseClient = new MongoDatabaseClient(this.logger);
+
   }
 
   private async onImportedLine(line: string, resolve: () => void) {

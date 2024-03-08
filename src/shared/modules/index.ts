@@ -9,7 +9,6 @@ export * from './user/types/login-user-request.type.js';
 export * from './user/dto/create-user.dto.js';
 export * from './user/dto/login-user.dto.js';
 export * from './user/dto/update-user.dto.js';
-export * from './user/dto/favorite-user.dto.js';
 export * from './user/rdo/user.rdo.js';
 export * from './user/rdo/logged-user.rdo.js';
 export * from './user/rdo/upload-user-avatar.rdo.js';
@@ -20,7 +19,8 @@ export * from './offer/offer.container.js';
 export * from './offer/offer.entity.js';
 export * from './offer/offer.controller.js';
 export * from './offer//types/create-offer-request.type.js';
-export * from './offer/update-offer-request.type.js';
+export * from './offer/types/update-offer-request.type.js';
+export * from './offer/types/favorite-offer-request.type.js';
 export * from './offer/types/param-offerid.type.js';
 
 export * from './offer/dto/create-offer.dto.js';
